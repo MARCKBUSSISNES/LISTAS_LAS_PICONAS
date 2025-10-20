@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📝 Generador de Listas de Productos</title>
+<title>📝 Generador de Listas - Dark</title>
 <style>
 :root {
     --bg-dark: #121212;
@@ -25,7 +25,7 @@ body {
 }
 
 .container {
-    max-width: 600px;
+    max-width: 650px;
     width: 100%;
     background: var(--card-dark);
     padding: 2rem;
@@ -33,7 +33,7 @@ body {
     box-shadow: 0 10px 25px rgba(0,0,0,0.6);
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 h1 {
@@ -56,6 +56,7 @@ select, input[type="text"], input[type="number"], textarea {
     border: 1px solid #333;
     background: #1a1a1a;
     color: var(--text-light);
+    font-size: 1rem;
 }
 
 button {
@@ -74,20 +75,25 @@ button:hover {
     color: #fff;
 }
 
-ul {
-    list-style: none;
-    padding: 0;
-    max-height: 200px;
-    overflow-y: auto;
-    border: 1px solid #333;
-    border-radius: 10px;
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
 }
 
-li {
-    padding: 0.6rem;
-    border-bottom: 1px solid #333;
-    display: flex;
-    justify-content: space-between;
+table th, table td {
+    border: 1px solid #333;
+    padding: 6px;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+th {
+    background: #1a1a1a;
+}
+
+td input[type="checkbox"] {
+    transform: scale(1.2);
 }
 
 .footer {
@@ -96,17 +102,9 @@ li {
     color: var(--text-muted);
 }
 
-/* Scrollbar oscuro */
-ul::-webkit-scrollbar {
-    width: 8px;
-}
-ul::-webkit-scrollbar-track { background: #1a1a1a; border-radius:10px; }
-ul::-webkit-scrollbar-thumb { background: var(--accent); border-radius:10px; }
-
 </style>
 </head>
 <body>
-
 <div class="container">
     <h1>📝 Generador de Listas</h1>
 
@@ -127,97 +125,107 @@ ul::-webkit-scrollbar-thumb { background: var(--accent); border-radius:10px; }
 
     <button id="addBtn">Agregar a la lista</button>
 
-    <ul id="listaProductos"></ul>
+    <table id="tablaProductos">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Proveedor</th>
+                <th>Recibido</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
-    <button id="generatePDF">Generar PDF e Enviar WhatsApp</button>
+    <button id="generatePDF">Generar PDF (80mm)</button>
 </div>
 
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-const listaProductos = document.getElementById('listaProductos');
+const tablaBody = document.querySelector('#tablaProductos tbody');
 let productos = [];
 
-document.getElementById('addBtn').addEventListener('click', ()=>{
+const agregarProducto = () => {
     const proveedor = document.getElementById('proveedor').value.trim();
     const producto = document.getElementById('producto').value.trim();
     const cantidad = document.getElementById('cantidad').value;
 
     if(!proveedor || !producto || !cantidad) return alert('Complete todos los campos');
 
-    productos.push({proveedor, producto, cantidad});
-    renderLista();
+    productos.push({producto, cantidad, proveedor});
+    renderTabla();
+    document.getElementById('producto').value='';
+    document.getElementById('cantidad').value='1';
+};
+
+document.getElementById('addBtn').addEventListener('click', agregarProducto);
+
+// Agregar con Enter en producto o cantidad
+document.getElementById('producto').addEventListener('keypress', e=>{
+    if(e.key==='Enter') agregarProducto();
+});
+document.getElementById('cantidad').addEventListener('keypress', e=>{
+    if(e.key==='Enter') agregarProducto();
 });
 
-function renderLista(){
-    listaProductos.innerHTML = '';
+function renderTabla(){
+    tablaBody.innerHTML = '';
     productos.forEach((p,i)=>{
-        const li = document.createElement('li');
-        li.innerHTML = `${p.cantidad} x ${p.producto} (Proveedor: ${p.proveedor}) <button onclick="eliminar(${i})">Eliminar</button>`;
-        listaProductos.appendChild(li);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${p.producto}</td>
+            <td>${p.cantidad}</td>
+            <td>${p.proveedor}</td>
+            <td><input type="checkbox"></td>
+        `;
+        tablaBody.appendChild(row);
     });
-}
-
-window.eliminar = function(idx){
-    productos.splice(idx,1);
-    renderLista();
 }
 
 document.getElementById('generatePDF').addEventListener('click', ()=>{
     if(productos.length===0) return alert('No hay productos en la lista');
 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({unit:'mm', format:[80, 200]}); // ancho 80mm
+    const doc = new jsPDF({unit:'mm', format:[80, 200]});
 
-    doc.setFontSize(10);
+    doc.setFontSize(11);
     doc.setFont("courier","normal");
     doc.text("📝 Lista de Productos", 40, 10, {align:'center'});
 
     let y = 20;
-    productos.forEach((p,i)=>{
-        doc.text(`${i+1}. ${p.cantidad} x ${p.producto} (Prov: ${p.proveedor})`, 5, y);
-        y+=5;
+    doc.setFontSize(10);
+
+    // Encabezado de tabla
+    doc.text("Producto",5,y);
+    doc.text("Cant",50,y);
+    doc.text("Proveedor",60,y);
+    doc.text("Recibido",75,y);
+    y+=5;
+
+    productos.forEach(p=>{
+        doc.text(p.producto,5,y);
+        doc.text(p.cantidad.toString(),50,y);
+        doc.text(p.proveedor,60,y);
+        doc.rect(75,y-3,8,5); // cuadro en blanco para marcar recibido
+        y+=6;
     });
 
     y+=5;
-    doc.setFontSize(9);
-    doc.text("¿Se reciben correctamente todos los productos?",5,y);
-    y+=5;
-    doc.text("[ ] Sí   [ ] No",5,y);
-
-    y+=10;
-    doc.text("Observaciones:",5,y);
-    y+=5;
+    doc.text("Observaciones:",5,y); y+=5;
     doc.text("__________________________",5,y); y+=5;
     doc.text("__________________________",5,y); y+=5;
-    doc.text("__________________________",5,y);
-
-    y+=10;
+    doc.text("__________________________",5,y); y+=10;
     doc.text("Firma quien recibe:",5,y); y+=5;
     doc.text("Nombre quien recibe:",5,y); y+=5;
     doc.text("Firma quien entrega:",5,y);
 
-    // Guardar PDF temporal y abrir WhatsApp
-    const pdfData = doc.output('datauristring');
+    // Guardar PDF
+    const pdfFileName = `Lista_${new Date().toISOString().slice(0,10)}.pdf`;
+    doc.save(pdfFileName);
 
-    // Mapear sucursal a número
-    const sucursal = document.getElementById('sucursal').value;
-    let number = '';
-    if(sucursal==='roosevelt') number='51330598';
-    if(sucursal==='sancristobal') number='39161962';
-    const mensaje = encodeURIComponent("Lista de productos:\n" + productos.map(p=>`${p.cantidad} x ${p.producto} (Prov: ${p.proveedor})`).join("\n"));
-    
-    // Abrir WhatsApp
-    window.open(`https://wa.me/502${number}?text=${mensaje}`, '_blank');
-
-    // También opción enviar a Juan Luis
-    const enviarJuanLuis = confirm("¿Desea enviar también a Juan Luis?");
-    if(enviarJuanLuis){
-        window.open(`https://wa.me/50258140621?text=${mensaje}`, '_blank');
-    }
-
+    alert("PDF generado y listo para enviar por WhatsApp manualmente.");
 });
 </script>
-
 </body>
 </html>
