@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generador de Listas</title>
+<title>TORTILLAS DE HARINA LAS PICONAS</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <style>
 body {
   font-family: 'Arial', sans-serif;
@@ -14,13 +15,21 @@ body {
   padding:0;
 }
 header{
-  text-align:center;
-  padding:20px 0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px;
   background:#000;
 }
 #logo{
-  width:300px;
+  width:450px;
   height:auto;
+}
+header h1{
+  font-size:2rem;
+  color:#25D366;
+  text-align:center;
+  flex:1;
 }
 .container{
   max-width:900px;
@@ -58,12 +67,15 @@ table{
 }
 table, th, td{border:1px solid #444;}
 th, td{padding:6px; text-align:center; font-size:1.1rem;}
+label{font-size:0.9rem;}
 </style>
 </head>
 <body>
 
 <header>
   <img src="LOGO1 (2).png" alt="Logo" id="logo">
+  <h1>TORTILLAS DE HARINA LAS PICONAS</h1>
+  <div id="currentDate"></div>
 </header>
 
 <div class="container">
@@ -97,6 +109,7 @@ th, td{padding:6px; text-align:center; font-size:1.1rem;}
   </table>
 
   <div class="form-group" style="margin-top:15px;">
+    <input type="text" id="operator" placeholder="Quién realiza el procedimiento">
     <select id="branch">
       <option value="">Sucursal</option>
       <option value="Roosevelt">Roosevelt</option>
@@ -110,6 +123,14 @@ th, td{padding:6px; text-align:center; font-size:1.1rem;}
 <script>
 const items = [];
 const tbody = document.querySelector('#itemsTable tbody');
+const currentDateEl = document.getElementById('currentDate');
+
+function updateDate(){
+  const now = new Date();
+  currentDateEl.textContent = now.toLocaleString();
+}
+updateDate();
+setInterval(updateDate, 1000);
 
 function renderTable(){
   tbody.innerHTML='';
@@ -140,58 +161,62 @@ document.getElementById('productName').addEventListener('keypress', (e)=>{
 
 document.getElementById('generatePDF').addEventListener('click', ()=>{
   if(items.length===0){ alert('No hay productos'); return; }
+  const operator = document.getElementById('operator').value.trim();
+  const branch = document.getElementById('branch').value;
+  if(!branch){ alert('Seleccione sucursal'); return; }
+  if(!operator){ alert('Ingrese quién realiza el procedimiento'); return; }
+
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({unit:'mm', format:[80,3000]});
   let y=10;
 
-  const branch = document.getElementById('branch').value;
-  if(!branch){ alert('Seleccione sucursal'); return; }
-
-  const today = new Date();
-  const fecha = today.toLocaleDateString() + ' ' + today.toLocaleTimeString();
-
   const logoImg = new Image();
   logoImg.src='LOGO1 (2).png';
   logoImg.onload = ()=>{
-    doc.addImage(logoImg,'PNG',15,y,50,30);
-    y+=35;
+    doc.addImage(logoImg,'PNG',10,y,60,35);
+    y+=38;
 
-    doc.setFontSize(12);
-    doc.text(`Sucursal: ${branch}`, 40, y, {align:'center'});
-    y+=6;
-    doc.text(`Fecha: ${fecha}`, 40, y, {align:'center'});
-    y+=10;
-
-    // Título "Se reciben correctamente..."
+    const now = new Date();
     doc.setFontSize(10);
-    doc.text('Se reciben correctamente todos los productos', 40, y, {align:'center'});
+    doc.text(`Sucursal: ${branch}`, 40, y, {align:'center'});
+    doc.text(`Fecha: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`,70,10,{align:'right'});
+    y+=6;
+    doc.text(`Quién realiza: ${operator}`,40,y,{align:'center'});
     y+=6;
 
-    // Cabecera tabla
     doc.autoTable({
       startY: y,
       theme:'grid',
       head: [['Producto','Cantidad','Unidad','Proveedor','Recibido']],
-      body: items.map(it=>[it.name,it.qty,it.unit,it.supplier,'']),
+      body: items.map(it=>[it.name,it.qty,it.unit,it.supplier,'[ ]']),
       styles:{ fontSize:9, cellPadding:1 },
       margin:{left:5,right:5}
     });
 
     y = doc.lastAutoTable.finalY + 10;
 
-    // Observaciones
-    doc.text('Observaciones:',40,y,{align:'center'}); y+=6;
-    doc.text('_______________________',40,y,{align:'center'}); y+=8;
-    doc.text('_______________________',40,y,{align:'center'}); y+=8;
-    doc.text('_______________________',40,y,{align:'center'}); y+=12;
+    // Texto Se recibe correctamente y cuadros SI / NO
+    doc.setFontSize(10);
+    doc.text('Se reciben correctamente todos los productos:',40,y,{align:'center'});
+    y+=6;
+    doc.rect(20,y,6,6); doc.text('SI',28,y+5);
+    doc.rect(45,y,6,6); doc.text('NO',53,y+5);
+    y+=12;
 
-    // Firmas
+    // Observaciones y firmas
+    doc.text('Observaciones:',40,y,{align:'center'}); y+=6;
+    doc.text('___________________________',40,y,{align:'center'}); y+=8;
+    doc.text('___________________________',40,y,{align:'center'}); y+=8;
+    doc.text('___________________________',40,y,{align:'center'}); y+=12;
+
     doc.text('Firma de quien recibe:',40,y,{align:'center'}); y+=6;
-    doc.text('_______________________',40,y,{align:'center'}); y+=8;
+    doc.text('___________________________',40,y,{align:'center'}); y+=8;
     doc.text('Nombre de quien recibe:',40,y,{align:'center'}); y+=6;
-    doc.text('_______________________',40,y,{align:'center'}); y+=8;
+    doc.text('___________________________',40,y,{align:'center'}); y+=8;
     doc.text('Firma de quien entrega:',40,y,{align:'center'}); y+=6;
-    doc.text('_______________________',40,y,{align:'center'}); y+=8;
+    doc.text('___________________________',40,y,{align:'center'}); y+=8;
+
+    doc.text('MarckBusiness © 2025 — Todos los derechos reservados',40,y,{align:'center'});
 
     doc.save('ListaProductos.pdf');
   }
@@ -201,6 +226,5 @@ document.getElementById('sendJuanBtn').addEventListener('click', ()=>{
   window.open('https://wa.me/58140621','_blank');
 });
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </body>
 </html>
