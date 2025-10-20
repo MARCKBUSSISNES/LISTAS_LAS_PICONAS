@@ -265,7 +265,9 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
     doc.setFontSize(8);
     doc.text('MarckBusiness © 2025 — Todos los derechos reservados',40,y,{align:'center'});
 
-    doc.save('ListaProductos.pdf');
+    // Guardar PDF con nombre de sucursal y fecha
+    const fileName = `Lista_${branch}_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}.pdf`;
+    doc.save(fileName);
 
     // Abrir WhatsApp según sucursal
     let number='';
@@ -282,3 +284,4 @@ document.getElementById('sendJuanBtn').addEventListener('click', ()=>{
 </script>
 </body>
 </html>
+
