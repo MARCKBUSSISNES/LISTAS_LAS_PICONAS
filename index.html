@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📝 Generador de Listas de Productos</title>
+<style>
+:root {
+    --bg-dark: #121212;
+    --card-dark: #1f1f1f;
+    --accent: #03dac6;
+    --primary: #bb86fc;
+    --text-light: #e0e0e0;
+    --text-muted: #a1a1a1;
+}
+
+body {
+    background: var(--bg-dark);
+    color: var(--text-light);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    max-width: 600px;
+    width: 100%;
+    background: var(--card-dark);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+h1 {
+    text-align: center;
+    color: var(--primary);
+}
+
+label {
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+    display: block;
+    color: var(--text-muted);
+}
+
+select, input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    padding: 0.6rem;
+    margin-bottom: 0.8rem;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #1a1a1a;
+    color: var(--text-light);
+}
+
+button {
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: var(--primary);
+    color: #fff;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #333;
+    border-radius: 10px;
+}
+
+li {
+    padding: 0.6rem;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+}
+
+.footer {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Scrollbar oscuro */
+ul::-webkit-scrollbar {
+    width: 8px;
+}
+ul::-webkit-scrollbar-track { background: #1a1a1a; border-radius:10px; }
+ul::-webkit-scrollbar-thumb { background: var(--accent); border-radius:10px; }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📝 Generador de Listas</h1>
+
+    <label for="sucursal">Sucursal:</label>
+    <select id="sucursal">
+        <option value="roosevelt">Roosevelt</option>
+        <option value="sancristobal">San Cristóbal</option>
+    </select>
+
+    <label for="proveedor">Proveedor:</label>
+    <input type="text" id="proveedor" placeholder="Nombre del proveedor">
+
+    <label for="producto">Producto:</label>
+    <input type="text" id="producto" placeholder="Nombre del producto">
+
+    <label for="cantidad">Cantidad:</label>
+    <input type="number" id="cantidad" min="1" value="1">
+
+    <button id="addBtn">Agregar a la lista</button>
+
+    <ul id="listaProductos"></ul>
+
+    <button id="generatePDF">Generar PDF e Enviar WhatsApp</button>
+</div>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const listaProductos = document.getElementById('listaProductos');
+let productos = [];
+
+document.getElementById('addBtn').addEventListener('click', ()=>{
+    const proveedor = document.getElementById('proveedor').value.trim();
+    const producto = document.getElementById('producto').value.trim();
+    const cantidad = document.getElementById('cantidad').value;
+
+    if(!proveedor || !producto || !cantidad) return alert('Complete todos los campos');
+
+    productos.push({proveedor, producto, cantidad});
+    renderLista();
+});
+
+function renderLista(){
+    listaProductos.innerHTML = '';
+    productos.forEach((p,i)=>{
+        const li = document.createElement('li');
+        li.innerHTML = `${p.cantidad} x ${p.producto} (Proveedor: ${p.proveedor}) <button onclick="eliminar(${i})">Eliminar</button>`;
+        listaProductos.appendChild(li);
+    });
+}
+
+window.eliminar = function(idx){
+    productos.splice(idx,1);
+    renderLista();
+}
+
+document.getElementById('generatePDF').addEventListener('click', ()=>{
+    if(productos.length===0) return alert('No hay productos en la lista');
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({unit:'mm', format:[80, 200]}); // ancho 80mm
+
+    doc.setFontSize(10);
+    doc.setFont("courier","normal");
+    doc.text("📝 Lista de Productos", 40, 10, {align:'center'});
+
+    let y = 20;
+    productos.forEach((p,i)=>{
+        doc.text(`${i+1}. ${p.cantidad} x ${p.producto} (Prov: ${p.proveedor})`, 5, y);
+        y+=5;
+    });
+
+    y+=5;
+    doc.setFontSize(9);
+    doc.text("¿Se reciben correctamente todos los productos?",5,y);
+    y+=5;
+    doc.text("[ ] Sí   [ ] No",5,y);
+
+    y+=10;
+    doc.text("Observaciones:",5,y);
+    y+=5;
+    doc.text("__________________________",5,y); y+=5;
+    doc.text("__________________________",5,y); y+=5;
+    doc.text("__________________________",5,y);
+
+    y+=10;
+    doc.text("Firma quien recibe:",5,y); y+=5;
+    doc.text("Nombre quien recibe:",5,y); y+=5;
+    doc.text("Firma quien entrega:",5,y);
+
+    // Guardar PDF temporal y abrir WhatsApp
+    const pdfData = doc.output('datauristring');
+
+    // Mapear sucursal a número
+    const sucursal = document.getElementById('sucursal').value;
+    let number = '';
+    if(sucursal==='roosevelt') number='51330598';
+    if(sucursal==='sancristobal') number='39161962';
+    const mensaje = encodeURIComponent("Lista de productos:\n" + productos.map(p=>`${p.cantidad} x ${p.producto} (Prov: ${p.proveedor})`).join("\n"));
+    
+    // Abrir WhatsApp
+    window.open(`https://wa.me/502${number}?text=${mensaje}`, '_blank');
+
+    // También opción enviar a Juan Luis
+    const enviarJuanLuis = confirm("¿Desea enviar también a Juan Luis?");
+    if(enviarJuanLuis){
+        window.open(`https://wa.me/50258140621?text=${mensaje}`, '_blank');
+    }
+
+});
+</script>
+
+</body>
+</html>
