@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📝 Generador de Listas - Dark</title>
+<title>Generador de Listas Dark</title>
 <style>
 :root {
     --bg-dark: #121212;
@@ -84,7 +84,7 @@ table {
 table th, table td {
     border: 1px solid #333;
     padding: 6px;
-    text-align: left;
+    text-align: center;
     font-size: 0.95rem;
 }
 
@@ -140,7 +140,6 @@ td input[type="checkbox"] {
     <button id="generatePDF">Generar PDF (80mm)</button>
 </div>
 
-<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const tablaBody = document.querySelector('#tablaProductos tbody');
@@ -161,7 +160,7 @@ const agregarProducto = () => {
 
 document.getElementById('addBtn').addEventListener('click', agregarProducto);
 
-// Agregar con Enter en producto o cantidad
+// Enter agrega producto
 document.getElementById('producto').addEventListener('keypress', e=>{
     if(e.key==='Enter') agregarProducto();
 });
@@ -183,49 +182,70 @@ function renderTabla(){
     });
 }
 
-document.getElementById('generatePDF').addEventListener('click', ()=>{
+document.getElementById('generatePDF').addEventListener('click', async ()=>{
     if(productos.length===0) return alert('No hay productos en la lista');
 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({unit:'mm', format:[80, 200]});
+    const doc = new jsPDF({unit:'mm', format:[80, 250]});
 
-    doc.setFontSize(11);
-    doc.setFont("courier","normal");
-    doc.text("📝 Lista de Productos", 40, 10, {align:'center'});
+    // Logo centrado
+    const img = new Image();
+    img.src = 'LOGO1.png'; // debe estar en el mismo directorio o usar ruta completa
+    img.onload = function() {
+        const imgWidth = 50;
+        doc.addImage(img, 'PNG', (80-imgWidth)/2, 5, imgWidth, imgWidth*0.4);
+        let y = 25;
 
-    let y = 20;
-    doc.setFontSize(10);
+        doc.setFontSize(10);
+        doc.setFont("courier","normal");
+        
+        // Tabla productos centrada
+        y += 5;
+        doc.text("Producto",5,y);
+        doc.text("Cant",50,y);
+        doc.text("Proveedor",60,y);
+        doc.text("Recibido",75,y);
+        y+=5;
 
-    // Encabezado de tabla
-    doc.text("Producto",5,y);
-    doc.text("Cant",50,y);
-    doc.text("Proveedor",60,y);
-    doc.text("Recibido",75,y);
-    y+=5;
+        productos.forEach(p=>{
+            doc.text(p.producto,5,y);
+            doc.text(p.cantidad.toString(),50,y);
+            doc.text(p.proveedor,60,y);
+            doc.rect(75,y-3,8,5); // cuadro
+            y+=6;
+        });
 
-    productos.forEach(p=>{
-        doc.text(p.producto,5,y);
-        doc.text(p.cantidad.toString(),50,y);
-        doc.text(p.proveedor,60,y);
-        doc.rect(75,y-3,8,5); // cuadro en blanco para marcar recibido
         y+=6;
-    });
+        // Texto Se recibe correctamente
+        const text = "Se reciben correctamente todos los productos";
+        doc.text(text, 40, y, {align:'center'});
+        y+=5;
 
-    y+=5;
-    doc.text("Observaciones:",5,y); y+=5;
-    doc.text("__________________________",5,y); y+=5;
-    doc.text("__________________________",5,y); y+=5;
-    doc.text("__________________________",5,y); y+=10;
-    doc.text("Firma quien recibe:",5,y); y+=5;
-    doc.text("Nombre quien recibe:",5,y); y+=5;
-    doc.text("Firma quien entrega:",5,y);
+        // Cuadros Sí / No
+        doc.rect(25, y, 5,5); doc.text("Sí",32,y+4);
+        doc.rect(55, y,5,5); doc.text("No",62,y+4);
+        y+=12;
 
-    // Guardar PDF
-    const pdfFileName = `Lista_${new Date().toISOString().slice(0,10)}.pdf`;
-    doc.save(pdfFileName);
+        // Observaciones centradas
+        doc.text("Observaciones:",40,y,{align:'center'}); y+=6;
+        doc.text("__________________________",40,y,{align:'center'}); y+=6;
+        doc.text("__________________________",40,y,{align:'center'}); y+=6;
+        doc.text("__________________________",40,y,{align:'center'}); y+=10;
 
-    alert("PDF generado y listo para enviar por WhatsApp manualmente.");
+        // Firmas centradas
+        const firmas = ["Firma quien recibe:", "Nombre quien recibe:", "Firma quien entrega:"];
+        firmas.forEach(f=>{
+            doc.text(f,40,y,{align:'center'}); y+=5;
+            doc.text("__________________________",40,y,{align:'center'}); y+=10;
+        });
+
+        // Guardar PDF
+        const pdfFileName = `Lista_${new Date().toISOString().slice(0,10)}.pdf`;
+        doc.save(pdfFileName);
+        alert("PDF generado correctamente");
+    }
 });
 </script>
 </body>
 </html>
+
