@@ -60,6 +60,7 @@ button{
 }
 #addBtn{background:#25D366;color:#fff;}
 #sendJuanBtn{background:#000;color:#25D366;}
+#resetBtn{background:#e74c3c;color:#fff;}
 table{
   width:100%;
   border-collapse:collapse;
@@ -68,6 +69,12 @@ table{
 table, th, td{border:1px solid #444;}
 th, td{padding:6px; text-align:center; font-size:1.1rem;}
 label{font-size:0.9rem;}
+footer{
+  text-align:center;
+  margin-top:20px;
+  color:#888;
+  font-size:0.9rem;
+}
 </style>
 </head>
 <body>
@@ -117,8 +124,13 @@ label{font-size:0.9rem;}
     </select>
     <button id="generatePDF">Generar PDF</button>
     <button id="sendJuanBtn">Enviar a Juan Luis</button>
+    <button id="resetBtn">Reiniciar todo</button>
   </div>
 </div>
+
+<footer>
+  MarckBusiness © 2025 — Todos los derechos reservados
+</footer>
 
 <script>
 const items = [];
@@ -201,22 +213,6 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
     y+=6;
     doc.rect(20,y,6,6); doc.text('SI',28,y+5);
     doc.rect(45,y,6,6); doc.text('NO',53,y+5);
-    y+=12;
-
-    // Observaciones y firmas
-    doc.text('Observaciones:',40,y,{align:'center'}); y+=6;
-    doc.text('___________________________',40,y,{align:'center'}); y+=8;
-    doc.text('___________________________',40,y,{align:'center'}); y+=8;
-    doc.text('___________________________',40,y,{align:'center'}); y+=12;
-
-    doc.text('Firma de quien recibe:',40,y,{align:'center'}); y+=6;
-    doc.text('___________________________',40,y,{align:'center'}); y+=8;
-    doc.text('Nombre de quien recibe:',40,y,{align:'center'}); y+=6;
-    doc.text('___________________________',40,y,{align:'center'}); y+=8;
-    doc.text('Firma de quien entrega:',40,y,{align:'center'}); y+=6;
-    doc.text('___________________________',40,y,{align:'center'}); y+=8;
-
-    doc.text('MarckBusiness © 2025 — Todos los derechos reservados',40,y,{align:'center'});
 
     doc.save('ListaProductos.pdf');
   }
@@ -224,6 +220,18 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
 
 document.getElementById('sendJuanBtn').addEventListener('click', ()=>{
   window.open('https://wa.me/58140621','_blank');
+});
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(confirm('¿Desea reiniciar todo?')) {
+    items.length=0;
+    renderTable();
+    document.getElementById('productName').value='';
+    document.getElementById('productQty').value='';
+    document.getElementById('productUnit').value='';
+    document.getElementById('operator').value='';
+    document.getElementById('branch').value='';
+  }
 });
 </script>
 </body>
