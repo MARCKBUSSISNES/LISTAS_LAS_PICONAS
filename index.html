@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>INGRESE LOS PRODUCTOS PARA ENVIAR</title>
+<title>TORTILLAS DE HARINA LAS PICONAS</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <style>
@@ -219,14 +219,14 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
   if(!operator){ alert('Ingrese quién realiza el procedimiento'); return; }
 
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({unit:'mm', format:[80,3000]});
+  const doc = new jsPDF({unit:'mm', format:[80,0]}); // auto altura
   let y=10;
 
   const logoImg = new Image();
   logoImg.src='LOGO1 (2).png';
   logoImg.onload = ()=>{
-    doc.addImage(logoImg,'PNG',10,y,65,45);
-    y+=48;
+    doc.addImage(logoImg,'PNG',10,y,60,35);
+    y+=38;
 
     const now = new Date();
     doc.setFontSize(10);
@@ -238,7 +238,7 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
 
     const tableBody = items.map(it=>{
       let name = it.name;
-      if(name.length>20) name = name.replace(/(.{20})/g,"$1\n");
+      if(name.length>15) name = it.name.match(/.{1,15}/g).join('\n');
       return [name,it.qty,it.unit,it.supplier,'[ ]'];
     });
 
@@ -248,7 +248,7 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
       head: [['Producto','Cantidad','Unidad','Proveedor','Recibido']],
       body: tableBody,
       styles:{ fontSize:9, cellPadding:1, overflow:'linebreak' },
-      columnStyles: {0:{cellWidth:35},1:{cellWidth:15},2:{cellWidth:15},3:{cellWidth:15},4:{cellWidth:10}},
+      columnStyles: {0:{cellWidth:35},1:{cellWidth:12},2:{cellWidth:12},3:{cellWidth:12},4:{cellWidth:10}},
       margin:{left:5,right:5}
     });
 
@@ -272,8 +272,8 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
     // Texto final SI/NO
     doc.text('Se reciben correctamente todos los productos:',40,y,{align:'center'});
     y+=6;
-    doc.rect(20,y,6,6); doc.text('SI',28,y+5);
-    doc.rect(45,y,6,6); doc.text('NO',53,y+5);
+    doc.rect(20,y,8,8); doc.text('SI',30,y+6);
+    doc.rect(50,y,8,8); doc.text('NO',58,y+6);
     y+=12;
 
     // Pie de página
@@ -297,3 +297,4 @@ document.getElementById('sendJuanBtn').addEventListener('click', ()=>{
 </script>
 </body>
 </html>
+
