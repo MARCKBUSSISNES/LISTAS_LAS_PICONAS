@@ -7,9 +7,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap'); /* estilo tipo LCD */
+
 body {
   font-family: 'Arial', sans-serif;
-  background:#121212;
+  background: url('FONDO PARA LISTA.jpg') no-repeat center center fixed;
+  background-size: cover;
   color:#fff;
   margin:0;
   padding:0;
@@ -19,7 +22,8 @@ header{
   justify-content:space-between;
   align-items:center;
   padding:20px;
-  background:#000;
+  background:rgba(0,0,0,0.7);
+  position: relative;
 }
 #logo{
   width:600px;
@@ -32,13 +36,19 @@ header h1{
   flex:1;
 }
 #currentDate{
-  text-align:right;
+  position:absolute;
+  top:5px;
+  right:10px;
+  font-family: 'Share Tech Mono', monospace;
   font-size:0.9rem;
+  color:#00FF00;
 }
 .container{
   max-width:900px;
   margin:auto;
   padding:20px;
+  background: rgba(0,0,0,0.5);
+  border-radius:10px;
 }
 .form-group{
   display:flex;
@@ -64,14 +74,23 @@ button{
   transition:0.3s;
 }
 button:hover{
-  transform:scale(1.05);
+  transform:scale(1.1);
   opacity:0.9;
 }
 #addBtn{background:#25D366;color:#fff;}
 #sendJuanBtn{background:#000;color:#25D366;}
-#resetBtn{background:#e74c3c;color:#fff;}
-.clearBtn{background:#f39c12;color:#fff;}
-.deleteBtn{background:#c0392b;color:#fff;padding:5px 10px;border-radius:5px;font-size:0.9rem;}
+#clearAllBtn{
+  background:#f39c12;
+  color:#fff;
+  border-radius:50%;
+  width:50px;
+  height:50px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:0.9rem;
+  padding:0;
+}
 table{
   width:100%;
   border-collapse:collapse;
@@ -105,8 +124,7 @@ label{font-size:0.9rem;}
       <option value="PRC">PRC</option>
     </select>
     <button id="addBtn">Agregar</button>
-    <button id="resetBtn">Reiniciar todo</button>
-    <button id="clearAllBtn" class="clearBtn">Limpiar todo</button>
+    <button id="clearAllBtn">Limpiar</button>
   </div>
 
   <table id="itemsTable">
@@ -187,17 +205,6 @@ document.getElementById('productName').addEventListener('keypress', (e)=>{
   if(e.key==='Enter'){ document.getElementById('addBtn').click(); }
 });
 
-document.getElementById('resetBtn').addEventListener('click', ()=>{
-  if(confirm("¿Desea reiniciar todo?")){
-    items.length=0;
-    renderTable();
-    document.getElementById('operator').value='';
-    document.getElementById('productName').value='';
-    document.getElementById('productQty').value='';
-    document.getElementById('productUnit').value='';
-  }
-});
-
 document.getElementById('clearAllBtn').addEventListener('click', ()=>{
   items.length=0;
   renderTable();
@@ -228,7 +235,6 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
     doc.text(`Quién realiza: ${operator}`,40,y,{align:'center'});
     y+=6;
 
-    // Ajustar altura de celda si el producto es muy largo
     const tableBody = items.map(it=>{
       let name = it.name;
       if(name.length>20) name = name.replace(/(.{20})/g,"$1\n");
