@@ -7,12 +7,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap'); 
-
 body {
   font-family: 'Arial', sans-serif;
-  background: url('FONDO PARA LISTA.jpg') no-repeat center center fixed;
-  background-size: cover;
+  background:#121212 url('FONDO PARA LISTA.jpg') no-repeat center center fixed;
+  background-size:cover;
   color:#fff;
   margin:0;
   padding:0;
@@ -22,11 +20,11 @@ header{
   justify-content:space-between;
   align-items:center;
   padding:20px;
-  background:rgba(0,0,0,0.7);
+  background:#000;
   position: relative;
 }
 #logo{
-  width:600px;
+  width:500px;
   height:auto;
 }
 header h1{
@@ -39,16 +37,13 @@ header h1{
   position:absolute;
   top:5px;
   right:10px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size:0.9rem;
-  color:#00FF00;
+  font-family: 'digital-7', monospace;
+  font-size:1rem;
 }
 .container{
   max-width:900px;
   margin:auto;
   padding:20px;
-  background: rgba(0,0,0,0.5);
-  border-radius:10px;
 }
 .form-group{
   display:flex;
@@ -71,26 +66,19 @@ button{
   cursor:pointer;
   font-weight:bold;
   font-size:1rem;
-  transition:0.3s;
-}
-button:hover{
-  transform:scale(1.1);
-  opacity:0.9;
 }
 #addBtn{background:#25D366;color:#fff;}
 #sendJuanBtn{background:#000;color:#25D366;}
-#clearAllBtn{
-  background:#f39c12;
-  color:#fff;
+#cleanBtn{
+  width:40px; height:40px;
   border-radius:50%;
-  width:50px;
-  height:50px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:0.9rem;
-  padding:0;
+  border:2px solid #25D366;
+  background:transparent;
+  color:#25D366;
+  font-weight:bold;
+  transition:0.3s;
 }
+#cleanBtn:hover{background:#25D366; color:#000;}
 table{
   width:100%;
   border-collapse:collapse;
@@ -124,7 +112,7 @@ label{font-size:0.9rem;}
       <option value="PRC">PRC</option>
     </select>
     <button id="addBtn">Agregar</button>
-    <button id="clearAllBtn">Limpiar</button>
+    <button id="cleanBtn">🗑</button>
   </div>
 
   <table id="itemsTable">
@@ -154,13 +142,13 @@ label{font-size:0.9rem;}
   </div>
 </div>
 
-<audio id="beepSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+<audio id="addSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
 
 <script>
 const items = [];
 const tbody = document.querySelector('#itemsTable tbody');
 const currentDateEl = document.getElementById('currentDate');
-const beep = document.getElementById('beepSound');
+const addSound = document.getElementById('addSound');
 
 function updateDate(){
   const now = new Date();
@@ -173,18 +161,19 @@ function renderTable(){
   tbody.innerHTML='';
   items.forEach((it,index)=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${it.name}</td><td>${it.qty}</td><td>${it.unit}</td><td>${it.supplier}</td><td>[ ]</td>
-                    <td><button class="deleteBtn" data-index="${index}">Borrar</button></td>`;
+    tr.innerHTML = `<td>${it.name}</td>
+                    <td>${it.qty}</td>
+                    <td>${it.unit}</td>
+                    <td>${it.supplier}</td>
+                    <td>[ ]</td>
+                    <td><button onclick="deleteItem(${index})">❌</button></td>`;
     tbody.appendChild(tr);
   });
+}
 
-  document.querySelectorAll('.deleteBtn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const idx = parseInt(btn.getAttribute('data-index'));
-      items.splice(idx,1);
-      renderTable();
-    });
-  });
+function deleteItem(index){
+  items.splice(index,1);
+  renderTable();
 }
 
 document.getElementById('addBtn').addEventListener('click', ()=>{
@@ -195,20 +184,22 @@ document.getElementById('addBtn').addEventListener('click', ()=>{
   if(!name || !qty || !supplier){ alert('Complete todos los campos'); return; }
   items.push({name, qty, unit, supplier});
   renderTable();
+  addSound.play();
   document.getElementById('productName').value='';
   document.getElementById('productQty').value='';
   document.getElementById('productUnit').value='';
   document.getElementById('productName').focus();
-  beep.play();
 });
 
 document.getElementById('productName').addEventListener('keypress', (e)=>{
   if(e.key==='Enter'){ document.getElementById('addBtn').click(); }
 });
 
-document.getElementById('clearAllBtn').addEventListener('click', ()=>{
-  items.length=0;
-  renderTable();
+document.getElementById('cleanBtn').addEventListener('click', ()=>{
+  if(confirm("¿Desea limpiar toda la lista?")){
+    items.length=0;
+    renderTable();
+  }
 });
 
 document.getElementById('generatePDF').addEventListener('click', ()=>{
@@ -219,9 +210,9 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
   if(!operator){ alert('Ingrese quién realiza el procedimiento'); return; }
 
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({unit:'mm', format:[80,0]}); // auto altura
-  let y=10;
+  const doc = new jsPDF({unit:'mm', format:[80, 3000]}); // 80mm ancho
 
+  let y=10;
   const logoImg = new Image();
   logoImg.src='LOGO1 (2).png';
   logoImg.onload = ()=>{
@@ -236,58 +227,52 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
     doc.text(`Quién realiza: ${operator}`,40,y,{align:'center'});
     y+=6;
 
-    const tableBody = items.map(it=>{
-      let name = it.name;
-      if(name.length>15) name = it.name.match(/.{1,15}/g).join('\n');
-      return [name,it.qty,it.unit,it.supplier,'[ ]'];
-    });
-
     doc.autoTable({
       startY: y,
       theme:'grid',
       head: [['Producto','Cantidad','Unidad','Proveedor','Recibido']],
-      body: tableBody,
-      styles:{ fontSize:9, cellPadding:1, overflow:'linebreak' },
-      columnStyles: {0:{cellWidth:35},1:{cellWidth:12},2:{cellWidth:12},3:{cellWidth:12},4:{cellWidth:10}},
-      margin:{left:5,right:5}
+      body: items.map(it=>[it.name,it.qty,it.unit,it.supplier,'[ ]']),
+      styles:{ fontSize:9, cellPadding:1 },
+      margin:{left:2,right:2},
+      tableWidth: 'auto'
     });
 
     y = doc.lastAutoTable.finalY + 10;
 
-    // Observaciones
+    // Observaciones con líneas más largas
     doc.text('Observaciones:',40,y,{align:'center'}); y+=6;
     for(let i=0;i<3;i++){
-      doc.text('_____________________________',40,y,{align:'center'});
+      doc.text('______________________________',40,y,{align:'center'});
       y+=8;
     }
 
-    // Firmas
+    // Firmas con líneas largas
     doc.text('Firma de quien recibe:',40,y,{align:'center'}); y+=6;
-    doc.text('_____________________________',40,y,{align:'center'}); y+=8;
+    doc.text('______________________________',40,y,{align:'center'}); y+=8;
     doc.text('Nombre de quien recibe:',40,y,{align:'center'}); y+=6;
-    doc.text('_____________________________',40,y,{align:'center'}); y+=8;
+    doc.text('______________________________',40,y,{align:'center'}); y+=8;
     doc.text('Firma de quien entrega:',40,y,{align:'center'}); y+=6;
-    doc.text('_____________________________',40,y,{align:'center'}); y+=12;
+    doc.text('______________________________',40,y,{align:'center'}); y+=12;
 
     // Texto final SI/NO
     doc.text('Se reciben correctamente todos los productos:',40,y,{align:'center'});
     y+=6;
-    doc.rect(20,y,8,8); doc.text('SI',30,y+6);
-    doc.rect(50,y,8,8); doc.text('NO',58,y+6);
+    doc.rect(20,y,6,6); doc.text('SI',28,y+5);
+    doc.rect(45,y,6,6); doc.text('NO',53,y+5);
     y+=12;
 
-    // Pie de página con MarckBusiness
+    // Pie de página MarckBusiness
     doc.setFontSize(8);
     doc.text('MarckBusiness © 2025 — Todos los derechos reservados',40,y,{align:'center'});
 
     doc.save('ListaProductos.pdf');
 
     // Abrir WhatsApp según sucursal
-    let waNumber='';
-    if(branch==='Roosevelt') waNumber='51330598';
-    else if(branch==='SanCristobal') waNumber='39161962';
-    else if(branch==='AtlanticPlaza') waNumber='36704724';
-    if(waNumber) window.open(`https://wa.me/${waNumber}`,'_blank');
+    let number='';
+    if(branch==='Roosevelt') number='51330598';
+    if(branch==='SanCristobal') number='39161962';
+    if(branch==='AtlanticPlaza') number='36704724';
+    if(number) window.open(`https://wa.me/${number}`,'_blank');
   }
 });
 
