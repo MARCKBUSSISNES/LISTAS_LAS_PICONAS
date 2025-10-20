@@ -3,255 +3,188 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generador de Listas Dark</title>
+<title>Generador de Listas - Prueba</title>
 <style>
-:root {
-    --bg-dark: #121212;
-    --card-dark: #1f1f1f;
-    --accent: #03dac6;
-    --primary: #bb86fc;
-    --text-light: #e0e0e0;
-    --text-muted: #a1a1a1;
+body{
+  font-family:'Courier New', monospace;
+  background:#121212;
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:20px;
 }
-
-body {
-    background: var(--bg-dark);
-    color: var(--text-light);
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    padding: 2rem;
-    display: flex;
-    justify-content: center;
+h1{
+  display:flex;
+  justify-content:center;
+  margin-bottom:20px;
 }
-
-.container {
-    max-width: 650px;
-    width: 100%;
-    background: var(--card-dark);
-    padding: 2rem;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+#logo{
+  width:300px;
+  margin-bottom:20px;
 }
-
-.header-logo {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 1rem;
+form{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
 }
-
-.header-logo img {
-    max-width: 150px;
-    height: auto;
+input, select{
+  padding:10px;
+  font-size:1.1rem;
+  border-radius:5px;
+  border:none;
 }
-
-label {
-    font-size: 0.9rem;
-    margin-bottom: 0.3rem;
-    display: block;
-    color: var(--text-muted);
+button{
+  padding:10px 15px;
+  font-size:1.1rem;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+  background:#ff6600;
+  color:#fff;
 }
-
-select, input[type="text"], input[type="number"], textarea {
-    width: 100%;
-    padding: 0.6rem;
-    margin-bottom: 0.8rem;
-    border-radius: 8px;
-    border: 1px solid #333;
-    background: #1a1a1a;
-    color: var(--text-light);
-    font-size: 1rem;
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-bottom:20px;
 }
-
-button {
-    padding: 0.6rem 1rem;
-    border: none;
-    border-radius: 10px;
-    background: var(--accent);
-    color: #000;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
+th, td{
+  border:1px solid #fff;
+  padding:8px;
+  text-align:center;
 }
-
-button:hover {
-    background: var(--primary);
-    color: #fff;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-table th, table td {
-    border: 1px solid #333;
-    padding: 6px;
-    text-align: center;
-    font-size: 0.95rem;
-}
-
-th {
-    background: #1a1a1a;
-}
-
-td input[type="checkbox"] {
-    transform: scale(1.2);
-}
-
-.footer {
-    text-align: center;
-    font-size: 0.85rem;
-    color: var(--text-muted);
+#sendJuanLuis img{
+  height:24px;
+  width:24px;
+  margin-right:5px;
 }
 </style>
 </head>
 <body>
-<div class="container">
-    <!-- Encabezado con logo -->
-    <div class="header-logo">
-        <img src="LOGO1 (2).png" alt="Logo">
-    </div>
 
-    <label for="sucursal">Sucursal:</label>
-    <select id="sucursal">
-        <option value="roosevelt">Roosevelt</option>
-        <option value="sancristobal">San Cristóbal</option>
-    </select>
+<h1><img id="logo" src="LOGO1 (2).png"></h1>
 
-    <label for="proveedor">Proveedor:</label>
-    <input type="text" id="proveedor" placeholder="Nombre del proveedor">
+<form id="productForm">
+  <input type="text" id="productName" placeholder="Producto" required>
+  <input type="number" id="productQty" placeholder="Cantidad" required min="1">
+  <select id="productSupplier" required>
+    <option value="">Proveedor</option>
+    <option>PP</option><option>AP</option><option>SC</option>
+    <option>RS</option><option>TERM</option><option>PRC</option>
+  </select>
+  <button type="submit">Agregar</button>
+</form>
 
-    <label for="producto">Producto:</label>
-    <input type="text" id="producto" placeholder="Nombre del producto">
+<table>
+  <thead>
+    <tr>
+      <th>Producto</th>
+      <th>Cantidad</th>
+      <th>Proveedor</th>
+      <th>Recibido</th>
+    </tr>
+  </thead>
+  <tbody id="productList"></tbody>
+</table>
 
-    <label for="cantidad">Cantidad:</label>
-    <input type="number" id="cantidad" min="1" value="1">
-
-    <button id="addBtn">Agregar a la lista</button>
-
-    <table id="tablaProductos">
-        <thead>
-            <tr>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Proveedor</th>
-                <th>Recibido</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-
-    <button id="generatePDF">Generar PDF (80mm)</button>
-</div>
+<button id="generatePDF">Generar PDF</button>
+<button id="sendJuanLuis"><img src="panel_carro.png">Enviar a Juan Luis</button>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-const tablaBody = document.querySelector('#tablaProductos tbody');
-let productos = [];
+let items = [];
 
-const agregarProducto = () => {
-    const proveedor = document.getElementById('proveedor').value.trim();
-    const producto = document.getElementById('producto').value.trim();
-    const cantidad = document.getElementById('cantidad').value;
+const form = document.getElementById('productForm');
+const productList = document.getElementById('productList');
 
-    if(!proveedor || !producto || !cantidad) return alert('Complete todos los campos');
-
-    productos.push({producto, cantidad, proveedor});
-    renderTabla();
-    document.getElementById('producto').value='';
-    document.getElementById('cantidad').value='1';
-};
-
-document.getElementById('addBtn').addEventListener('click', agregarProducto);
-
-// Enter agrega producto
-document.getElementById('producto').addEventListener('keypress', e=>{
-    if(e.key==='Enter') agregarProducto();
-});
-document.getElementById('cantidad').addEventListener('keypress', e=>{
-    if(e.key==='Enter') agregarProducto();
-});
-
-function renderTabla(){
-    tablaBody.innerHTML = '';
-    productos.forEach((p,i)=>{
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${p.producto}</td>
-            <td>${p.cantidad}</td>
-            <td>${p.proveedor}</td>
-            <td><input type="checkbox"></td>
-        `;
-        tablaBody.appendChild(row);
-    });
+function renderTable(){
+  productList.innerHTML = '';
+  items.forEach((i, idx)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i.name}</td>
+                    <td>${i.qty}</td>
+                    <td>${i.supplier}</td>
+                    <td></td>`;
+    productList.appendChild(tr);
+  });
 }
 
-document.getElementById('generatePDF').addEventListener('click', async ()=>{
-    if(productos.length===0) return alert('No hay productos en la lista');
+form.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const name = document.getElementById('productName').value.trim();
+  const qty = parseInt(document.getElementById('productQty').value);
+  const supplier = document.getElementById('productSupplier').value;
+  if(!name || !qty || !supplier) return alert('Complete todos los campos');
+  items.push({name, qty, supplier});
+  renderTable();
+  form.reset();
+  document.getElementById('productName').focus();
+});
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({unit:'mm', format:[80, 250]});
+// Enter para agregar producto
+document.getElementById('productName').addEventListener('keypress', (e)=>{
+  if(e.key==='Enter') form.dispatchEvent(new Event('submit'));
+});
 
-    // Logo centrado
-    const img = new Image();
-    img.src = 'LOGO1 (2).png'; // encabezado y PDF
-    img.onload = function() {
-        const imgWidth = 50;
-        doc.addImage(img, 'PNG', (80-imgWidth)/2, 5, imgWidth, imgWidth*0.4);
-        let y = 25;
+document.getElementById('productQty').addEventListener('keypress', (e)=>{
+  if(e.key==='Enter') form.dispatchEvent(new Event('submit'));
+});
 
-        doc.setFontSize(10);
-        doc.setFont("courier","normal");
-        
-        // Tabla productos centrada
-        y += 5;
-        doc.text("Producto",5,y);
-        doc.text("Cant",50,y);
-        doc.text("Proveedor",60,y);
-        doc.text("Recibido",75,y);
-        y+=5;
+document.getElementById('productSupplier').addEventListener('keypress', (e)=>{
+  if(e.key==='Enter') form.dispatchEvent(new Event('submit'));
+});
 
-        productos.forEach(p=>{
-            doc.text(p.producto,5,y);
-            doc.text(p.cantidad.toString(),50,y);
-            doc.text(p.proveedor,60,y);
-            doc.rect(75,y-3,8,5); // cuadro
-            y+=6;
-        });
+// Generar PDF 80mm
+document.getElementById('generatePDF').addEventListener('click', ()=>{
+  if(items.length===0) return alert('No hay productos');
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({
+    unit:'mm',
+    format:[80, 2000] // ancho 80mm, alto automático
+  });
+  let y = 10;
+  const logoImg = new Image();
+  logoImg.src = 'LOGO1 (2).png';
+  logoImg.onload = ()=>{
+    doc.addImage(logoImg, 'PNG', 15, y, 50, 30);
+    y += 35;
 
-        y+=6;
-        // Texto Se recibe correctamente
-        const text = "Se reciben correctamente todos los productos";
-        doc.text(text, 40, y, {align:'center'});
-        y+=5;
+    doc.setFontSize(12);
+    doc.text('Se reciben correctamente todos los productos', 40, y, {align:'center'});
+    y += 10;
 
-        // Cuadros Sí / No
-        doc.rect(25, y, 5,5); doc.text("Sí",32,y+4);
-        doc.rect(55, y,5,5); doc.text("No",62,y+4);
-        y+=12;
+    // Tabla productos
+    items.forEach(it=>{
+      let text = it.name;
+      let lines = doc.splitTextToSize(text, 60);
+      doc.text(lines, 5, y);
+      doc.text(it.qty.toString(), 45, y);
+      doc.text(it.supplier, 60, y);
+      y += lines.length * 6;
+    });
 
-        // Observaciones centradas
-        doc.text("Observaciones:",40,y,{align:'center'}); y+=6;
-        doc.text("__________________________",40,y,{align:'center'}); y+=6;
-        doc.text("__________________________",40,y,{align:'center'}); y+=6;
-        doc.text("__________________________",40,y,{align:'center'}); y+=10;
+    y += 10;
+    doc.text('Observaciones:', 40, y, {align:'center'}); y+=6;
+    doc.text('_______________________', 40, y, {align:'center'}); y+=8;
+    doc.text('_______________________', 40, y, {align:'center'}); y+=8;
+    doc.text('_______________________', 40, y, {align:'center'}); y+=12;
 
-        // Firmas centradas
-        const firmas = ["Firma quien recibe:", "Nombre quien recibe:", "Firma quien entrega:"];
-        firmas.forEach(f=>{
-            doc.text(f,40,y,{align:'center'}); y+=5;
-            doc.text("__________________________",40,y,{align:'center'}); y+=10;
-        });
+    doc.text('Firma de quien recibe:', 40, y, {align:'center'}); y+=6;
+    doc.text('_______________________', 40, y, {align:'center'}); y+=8;
+    doc.text('Nombre de quien recibe:', 40, y, {align:'center'}); y+=6;
+    doc.text('_______________________', 40, y, {align:'center'}); y+=8;
+    doc.text('Firma de quien entrega:', 40, y, {align:'center'}); y+=6;
+    doc.text('_______________________', 40, y, {align:'center'}); y+=8;
 
-        // Guardar PDF
-        const pdfFileName = `Lista_${new Date().toISOString().slice(0,10)}.pdf`;
-        doc.save(pdfFileName);
-        alert("PDF generado correctamente");
-    }
+    doc.save('ListaProductos.pdf');
+  }
+});
+
+// WhatsApp Juan Luis
+document.getElementById('sendJuanLuis').addEventListener('click', ()=>{
+  const mensaje = encodeURIComponent('Hola Juan Luis, adjunto la lista de productos.');
+  const url = `https://wa.me/58140621?text=${mensaje}`;
+  window.open(url, '_blank');
 });
 </script>
 </body>
