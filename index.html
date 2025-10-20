@@ -3,214 +3,204 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generador de Listas - Minimalista</title>
+<title>Generador de Listas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 body {
-  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Arial', sans-serif;
   background:#121212;
   color:#fff;
   margin:0;
   padding:0;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
 }
-header {
-  width:100%;
-  background:#1f1f1f;
-  display:flex;
-  justify-content:center;
+header{
+  text-align:center;
   padding:20px 0;
-  box-shadow:0 2px 8px rgba(0,0,0,0.4);
+  background:#000;
 }
-header img {
-  width:200px;
+#logo{
+  width:300px;
+  height:auto;
 }
-.container {
-  width:90%;
-  max-width:800px;
-  margin-top:20px;
-  background:#1f1f1f;
+.container{
+  max-width:900px;
+  margin:auto;
   padding:20px;
-  border-radius:12px;
-  box-shadow:0 4px 16px rgba(0,0,0,0.5);
 }
-form {
-  display:grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+.form-group{
+  display:flex;
   gap:10px;
-  margin-bottom:20px;
+  margin-bottom:12px;
+  flex-wrap:wrap;
 }
-input, select {
+select, input{
   padding:10px;
   border-radius:8px;
   border:none;
   font-size:1rem;
+  flex:1;
 }
-button {
-  padding:10px 15px;
+input[type=number]{width:100px;}
+button{
+  padding:12px 18px;
   border:none;
   border-radius:8px;
-  font-size:1rem;
   cursor:pointer;
-  transition:0.3s;
+  font-weight:bold;
+  font-size:1rem;
 }
-button:hover {opacity:0.9;}
-#addBtn {background:#25D366;color:#fff;}
-#sendJuanLuis {background:#000;color:#25D366;display:flex;align-items:center;gap:5px;}
-table {
+#addBtn{background:#25D366;color:#fff;}
+#sendJuanBtn{background:#000;color:#25D366;}
+table{
   width:100%;
   border-collapse:collapse;
+  margin-top:15px;
 }
-th, td {
-  border:1px solid #333;
-  padding:8px;
-  text-align:center;
-}
-thead {background:#333;}
+table, th, td{border:1px solid #444;}
+th, td{padding:6px; text-align:center; font-size:1.1rem;}
 </style>
 </head>
 <body>
 
 <header>
-  <img src="LOGO1 (2).png" alt="Logo">
+  <img src="LOGO1 (2).png" alt="Logo" id="logo">
 </header>
 
 <div class="container">
+  <div class="form-group">
+    <input type="text" id="productName" placeholder="Nombre del producto">
+    <input type="number" id="productQty" placeholder="Cantidad">
+    <input type="text" id="productUnit" placeholder="Unidad de medida">
+    <select id="productSupplier">
+      <option value="">Proveedor</option>
+      <option value="PP">PP</option>
+      <option value="AP">AP</option>
+      <option value="SC">SC</option>
+      <option value="RS">RS</option>
+      <option value="TERM">TERM</option>
+      <option value="PRC">PRC</option>
+    </select>
+    <button id="addBtn">Agregar</button>
+  </div>
 
-<form id="productForm">
-  <input type="text" id="productName" placeholder="Producto" required>
-  <input type="number" id="productQty" placeholder="Cantidad" required min="1">
-  <select id="productUnit" required>
-    <option value="">Unidad</option>
-    <option>Kg</option>
-    <option>L</option>
-    <option>Pza</option>
-    <option>Pack</option>
-  </select>
-  <select id="productSupplier" required>
-    <option value="">Proveedor</option>
-    <option>PP</option><option>AP</option><option>SC</option>
-    <option>RS</option><option>TERM</option><option>PRC</option>
-  </select>
-  <button type="submit" id="addBtn">Agregar</button>
-</form>
+  <table id="itemsTable">
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Cantidad</th>
+        <th>Unidad</th>
+        <th>Proveedor</th>
+        <th>Recibido</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-<table>
-  <thead>
-    <tr>
-      <th>Producto</th>
-      <th>Cantidad</th>
-      <th>Unidad</th>
-      <th>Proveedor</th>
-      <th>Recibido</th>
-    </tr>
-  </thead>
-  <tbody id="productList"></tbody>
-</table>
-
-<label>Sucursal:</label>
-<select id="branch">
-  <option value="Roosevelt">Roosevelt</option>
-  <option value="San Cristobal">San Cristobal</option>
-</select>
-
-<button id="generatePDF">Generar PDF</button>
-<button id="sendJuanLuis"><img src="panel_carro.png">Enviar a Juan Luis</button>
-
+  <div class="form-group" style="margin-top:15px;">
+    <select id="branch">
+      <option value="">Sucursal</option>
+      <option value="Roosevelt">Roosevelt</option>
+      <option value="SanCristobal">San Cristobal</option>
+    </select>
+    <button id="generatePDF">Generar PDF</button>
+    <button id="sendJuanBtn">Enviar a Juan Luis</button>
+  </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-let items = [];
-
-const form = document.getElementById('productForm');
-const productList = document.getElementById('productList');
+const items = [];
+const tbody = document.querySelector('#itemsTable tbody');
 
 function renderTable(){
-  productList.innerHTML = '';
+  tbody.innerHTML='';
   items.forEach(it=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${it.name}</td>
-                    <td>${it.qty}</td>
-                    <td>${it.unit}</td>
-                    <td>${it.supplier}</td>
-                    <td></td>`;
-    productList.appendChild(tr);
+    tr.innerHTML = `<td>${it.name}</td><td>${it.qty}</td><td>${it.unit}</td><td>${it.supplier}</td><td></td>`;
+    tbody.appendChild(tr);
   });
 }
 
-form.addEventListener('submit', (e)=>{
-  e.preventDefault();
+document.getElementById('addBtn').addEventListener('click', ()=>{
   const name = document.getElementById('productName').value.trim();
-  const qty = parseInt(document.getElementById('productQty').value);
-  const unit = document.getElementById('productUnit').value;
+  const qty = document.getElementById('productQty').value;
+  const unit = document.getElementById('productUnit').value.trim();
   const supplier = document.getElementById('productSupplier').value;
-  if(!name || !qty || !unit || !supplier) return alert('Complete todos los campos');
+  if(!name || !qty || !supplier){ alert('Complete todos los campos'); return; }
   items.push({name, qty, unit, supplier});
   renderTable();
-  document.getElementById('productName').value=''; // solo limpiar producto
+  document.getElementById('productName').value='';
+  document.getElementById('productQty').value='';
+  document.getElementById('productUnit').value='';
   document.getElementById('productName').focus();
 });
 
-// Enter solo limpia producto
-['productName','productQty','productUnit','productSupplier'].forEach(id=>{
-  document.getElementById(id).addEventListener('keypress', e=>{
-    if(e.key==='Enter') form.dispatchEvent(new Event('submit'));
-  });
+document.getElementById('productName').addEventListener('keypress', (e)=>{
+  if(e.key==='Enter'){ document.getElementById('addBtn').click(); }
 });
 
 document.getElementById('generatePDF').addEventListener('click', ()=>{
-  if(items.length===0) return alert('No hay productos');
+  if(items.length===0){ alert('No hay productos'); return; }
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({unit:'mm', format:[80,2000]});
+  const doc = new jsPDF({unit:'mm', format:[80,3000]});
   let y=10;
+
   const branch = document.getElementById('branch').value;
+  if(!branch){ alert('Seleccione sucursal'); return; }
+
+  const today = new Date();
+  const fecha = today.toLocaleDateString() + ' ' + today.toLocaleTimeString();
 
   const logoImg = new Image();
-  logoImg.src = 'LOGO1 (2).png';
+  logoImg.src='LOGO1 (2).png';
   logoImg.onload = ()=>{
     doc.addImage(logoImg,'PNG',15,y,50,30);
     y+=35;
 
     doc.setFontSize(12);
     doc.text(`Sucursal: ${branch}`, 40, y, {align:'center'});
-    y+=10;
-    doc.text('Se reciben correctamente todos los productos', 40, y, {align:'center'});
+    y+=6;
+    doc.text(`Fecha: ${fecha}`, 40, y, {align:'center'});
     y+=10;
 
-    // tabla
-    items.forEach(it=>{
-      const text = doc.splitTextToSize(it.name,60);
-      doc.text(text,5,y);
-      doc.text(it.qty.toString(),45,y);
-      doc.text(it.unit,50,y);
-      doc.text(it.supplier,60,y);
-      y+=text.length*6;
+    // Título "Se reciben correctamente..."
+    doc.setFontSize(10);
+    doc.text('Se reciben correctamente todos los productos', 40, y, {align:'center'});
+    y+=6;
+
+    // Cabecera tabla
+    doc.autoTable({
+      startY: y,
+      theme:'grid',
+      head: [['Producto','Cantidad','Unidad','Proveedor','Recibido']],
+      body: items.map(it=>[it.name,it.qty,it.unit,it.supplier,'']),
+      styles:{ fontSize:9, cellPadding:1 },
+      margin:{left:5,right:5}
     });
 
-    y+=10;
-    doc.text('Observaciones:', 40, y, {align:'center'}); y+=6;
-    doc.text('___________________________', 40, y, {align:'center'}); y+=8;
-    doc.text('___________________________', 40, y, {align:'center'}); y+=8;
-    doc.text('___________________________', 40, y, {align:'center'}); y+=12;
+    y = doc.lastAutoTable.finalY + 10;
 
-    doc.text('Firma de quien recibe:', 40, y, {align:'center'}); y+=6;
-    doc.text('___________________________', 40, y, {align:'center'}); y+=8;
-    doc.text('Nombre de quien recibe:', 40, y, {align:'center'}); y+=6;
-    doc.text('___________________________', 40, y, {align:'center'}); y+=8;
-    doc.text('Firma de quien entrega:', 40, y, {align:'center'}); y+=6;
-    doc.text('___________________________', 40, y, {align:'center'}); y+=8;
+    // Observaciones
+    doc.text('Observaciones:',40,y,{align:'center'}); y+=6;
+    doc.text('_______________________',40,y,{align:'center'}); y+=8;
+    doc.text('_______________________',40,y,{align:'center'}); y+=8;
+    doc.text('_______________________',40,y,{align:'center'}); y+=12;
+
+    // Firmas
+    doc.text('Firma de quien recibe:',40,y,{align:'center'}); y+=6;
+    doc.text('_______________________',40,y,{align:'center'}); y+=8;
+    doc.text('Nombre de quien recibe:',40,y,{align:'center'}); y+=6;
+    doc.text('_______________________',40,y,{align:'center'}); y+=8;
+    doc.text('Firma de quien entrega:',40,y,{align:'center'}); y+=6;
+    doc.text('_______________________',40,y,{align:'center'}); y+=8;
 
     doc.save('ListaProductos.pdf');
   }
 });
 
-// WhatsApp Juan Luis
-document.getElementById('sendJuanLuis').addEventListener('click', ()=>{
-  const url = `https://wa.me/58140621`;
-  window.open(url,'_blank');
+document.getElementById('sendJuanBtn').addEventListener('click', ()=>{
+  window.open('https://wa.me/58140621','_blank');
 });
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </body>
 </html>
