@@ -3,76 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generador de Listas - Prueba</title>
+<title>Generador de Listas - Minimalista</title>
 <style>
-body{
-  font-family:'Courier New', monospace;
+body {
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background:#121212;
   color:#fff;
+  margin:0;
+  padding:0;
   display:flex;
   flex-direction:column;
   align-items:center;
-  padding:20px;
 }
-h1{
+header {
+  width:100%;
+  background:#1f1f1f;
   display:flex;
   justify-content:center;
-  margin-bottom:20px;
+  padding:20px 0;
+  box-shadow:0 2px 8px rgba(0,0,0,0.4);
 }
-#logo{
-  width:300px;
-  margin-bottom:20px;
+header img {
+  width:200px;
 }
-form{
-  display:flex;
+.container {
+  width:90%;
+  max-width:800px;
+  margin-top:20px;
+  background:#1f1f1f;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.5);
+}
+form {
+  display:grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
   gap:10px;
   margin-bottom:20px;
 }
-input, select{
+input, select {
   padding:10px;
-  font-size:1.1rem;
-  border-radius:5px;
+  border-radius:8px;
   border:none;
+  font-size:1rem;
 }
-button{
+button {
   padding:10px 15px;
-  font-size:1.1rem;
   border:none;
-  border-radius:5px;
+  border-radius:8px;
+  font-size:1rem;
   cursor:pointer;
-  background:#ff6600;
-  color:#fff;
+  transition:0.3s;
 }
-table{
+button:hover {opacity:0.9;}
+#addBtn {background:#25D366;color:#fff;}
+#sendJuanLuis {background:#000;color:#25D366;display:flex;align-items:center;gap:5px;}
+table {
   width:100%;
   border-collapse:collapse;
-  margin-bottom:20px;
 }
-th, td{
-  border:1px solid #fff;
+th, td {
+  border:1px solid #333;
   padding:8px;
   text-align:center;
 }
-#sendJuanLuis img{
-  height:24px;
-  width:24px;
-  margin-right:5px;
-}
+thead {background:#333;}
 </style>
 </head>
 <body>
 
-<h1><img id="logo" src="LOGO1 (2).png"></h1>
+<header>
+  <img src="LOGO1 (2).png" alt="Logo">
+</header>
+
+<div class="container">
 
 <form id="productForm">
   <input type="text" id="productName" placeholder="Producto" required>
   <input type="number" id="productQty" placeholder="Cantidad" required min="1">
+  <select id="productUnit" required>
+    <option value="">Unidad</option>
+    <option>Kg</option>
+    <option>L</option>
+    <option>Pza</option>
+    <option>Pack</option>
+  </select>
   <select id="productSupplier" required>
     <option value="">Proveedor</option>
     <option>PP</option><option>AP</option><option>SC</option>
     <option>RS</option><option>TERM</option><option>PRC</option>
   </select>
-  <button type="submit">Agregar</button>
+  <button type="submit" id="addBtn">Agregar</button>
 </form>
 
 <table>
@@ -80,6 +101,7 @@ th, td{
     <tr>
       <th>Producto</th>
       <th>Cantidad</th>
+      <th>Unidad</th>
       <th>Proveedor</th>
       <th>Recibido</th>
     </tr>
@@ -87,8 +109,16 @@ th, td{
   <tbody id="productList"></tbody>
 </table>
 
+<label>Sucursal:</label>
+<select id="branch">
+  <option value="Roosevelt">Roosevelt</option>
+  <option value="San Cristobal">San Cristobal</option>
+</select>
+
 <button id="generatePDF">Generar PDF</button>
 <button id="sendJuanLuis"><img src="panel_carro.png">Enviar a Juan Luis</button>
+
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
@@ -99,11 +129,12 @@ const productList = document.getElementById('productList');
 
 function renderTable(){
   productList.innerHTML = '';
-  items.forEach((i, idx)=>{
+  items.forEach(it=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${i.name}</td>
-                    <td>${i.qty}</td>
-                    <td>${i.supplier}</td>
+    tr.innerHTML = `<td>${it.name}</td>
+                    <td>${it.qty}</td>
+                    <td>${it.unit}</td>
+                    <td>${it.supplier}</td>
                     <td></td>`;
     productList.appendChild(tr);
   });
@@ -113,68 +144,63 @@ form.addEventListener('submit', (e)=>{
   e.preventDefault();
   const name = document.getElementById('productName').value.trim();
   const qty = parseInt(document.getElementById('productQty').value);
+  const unit = document.getElementById('productUnit').value;
   const supplier = document.getElementById('productSupplier').value;
-  if(!name || !qty || !supplier) return alert('Complete todos los campos');
-  items.push({name, qty, supplier});
+  if(!name || !qty || !unit || !supplier) return alert('Complete todos los campos');
+  items.push({name, qty, unit, supplier});
   renderTable();
-  form.reset();
+  document.getElementById('productName').value=''; // solo limpiar producto
   document.getElementById('productName').focus();
 });
 
-// Enter para agregar producto
-document.getElementById('productName').addEventListener('keypress', (e)=>{
-  if(e.key==='Enter') form.dispatchEvent(new Event('submit'));
+// Enter solo limpia producto
+['productName','productQty','productUnit','productSupplier'].forEach(id=>{
+  document.getElementById(id).addEventListener('keypress', e=>{
+    if(e.key==='Enter') form.dispatchEvent(new Event('submit'));
+  });
 });
 
-document.getElementById('productQty').addEventListener('keypress', (e)=>{
-  if(e.key==='Enter') form.dispatchEvent(new Event('submit'));
-});
-
-document.getElementById('productSupplier').addEventListener('keypress', (e)=>{
-  if(e.key==='Enter') form.dispatchEvent(new Event('submit'));
-});
-
-// Generar PDF 80mm
 document.getElementById('generatePDF').addEventListener('click', ()=>{
   if(items.length===0) return alert('No hay productos');
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({
-    unit:'mm',
-    format:[80, 2000] // ancho 80mm, alto automático
-  });
-  let y = 10;
+  const doc = new jsPDF({unit:'mm', format:[80,2000]});
+  let y=10;
+  const branch = document.getElementById('branch').value;
+
   const logoImg = new Image();
   logoImg.src = 'LOGO1 (2).png';
   logoImg.onload = ()=>{
-    doc.addImage(logoImg, 'PNG', 15, y, 50, 30);
-    y += 35;
+    doc.addImage(logoImg,'PNG',15,y,50,30);
+    y+=35;
 
     doc.setFontSize(12);
+    doc.text(`Sucursal: ${branch}`, 40, y, {align:'center'});
+    y+=10;
     doc.text('Se reciben correctamente todos los productos', 40, y, {align:'center'});
-    y += 10;
+    y+=10;
 
-    // Tabla productos
+    // tabla
     items.forEach(it=>{
-      let text = it.name;
-      let lines = doc.splitTextToSize(text, 60);
-      doc.text(lines, 5, y);
-      doc.text(it.qty.toString(), 45, y);
-      doc.text(it.supplier, 60, y);
-      y += lines.length * 6;
+      const text = doc.splitTextToSize(it.name,60);
+      doc.text(text,5,y);
+      doc.text(it.qty.toString(),45,y);
+      doc.text(it.unit,50,y);
+      doc.text(it.supplier,60,y);
+      y+=text.length*6;
     });
 
-    y += 10;
+    y+=10;
     doc.text('Observaciones:', 40, y, {align:'center'}); y+=6;
-    doc.text('_______________________', 40, y, {align:'center'}); y+=8;
-    doc.text('_______________________', 40, y, {align:'center'}); y+=8;
-    doc.text('_______________________', 40, y, {align:'center'}); y+=12;
+    doc.text('___________________________', 40, y, {align:'center'}); y+=8;
+    doc.text('___________________________', 40, y, {align:'center'}); y+=8;
+    doc.text('___________________________', 40, y, {align:'center'}); y+=12;
 
     doc.text('Firma de quien recibe:', 40, y, {align:'center'}); y+=6;
-    doc.text('_______________________', 40, y, {align:'center'}); y+=8;
+    doc.text('___________________________', 40, y, {align:'center'}); y+=8;
     doc.text('Nombre de quien recibe:', 40, y, {align:'center'}); y+=6;
-    doc.text('_______________________', 40, y, {align:'center'}); y+=8;
+    doc.text('___________________________', 40, y, {align:'center'}); y+=8;
     doc.text('Firma de quien entrega:', 40, y, {align:'center'}); y+=6;
-    doc.text('_______________________', 40, y, {align:'center'}); y+=8;
+    doc.text('___________________________', 40, y, {align:'center'}); y+=8;
 
     doc.save('ListaProductos.pdf');
   }
@@ -182,9 +208,8 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
 
 // WhatsApp Juan Luis
 document.getElementById('sendJuanLuis').addEventListener('click', ()=>{
-  const mensaje = encodeURIComponent('Hola Juan Luis, adjunto la lista de productos.');
-  const url = `https://wa.me/58140621?text=${mensaje}`;
-  window.open(url, '_blank');
+  const url = `https://wa.me/58140621`;
+  window.open(url,'_blank');
 });
 </script>
 </body>
