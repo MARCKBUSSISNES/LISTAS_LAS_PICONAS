@@ -7,7 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap'); /* estilo tipo LCD */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap'); 
 
 body {
   font-family: 'Arial', sans-serif;
@@ -147,6 +147,7 @@ label{font-size:0.9rem;}
       <option value="">Sucursal</option>
       <option value="Roosevelt">Roosevelt</option>
       <option value="SanCristobal">San Cristobal</option>
+      <option value="AtlanticPlaza">Atlantic Plaza</option>
     </select>
     <button id="generatePDF">Generar PDF</button>
     <button id="sendJuanBtn">Enviar a Juan Luis</button>
@@ -246,7 +247,8 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
       theme:'grid',
       head: [['Producto','Cantidad','Unidad','Proveedor','Recibido']],
       body: tableBody,
-      styles:{ fontSize:9, cellPadding:1, cellWidth:'wrap' },
+      styles:{ fontSize:9, cellPadding:1, overflow:'linebreak' },
+      columnStyles: {0:{cellWidth:35},1:{cellWidth:15},2:{cellWidth:15},3:{cellWidth:15},4:{cellWidth:10}},
       margin:{left:5,right:5}
     });
 
@@ -255,17 +257,17 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
     // Observaciones
     doc.text('Observaciones:',40,y,{align:'center'}); y+=6;
     for(let i=0;i<3;i++){
-      doc.text('_______________________',40,y,{align:'center'});
+      doc.text('_____________________________',40,y,{align:'center'});
       y+=8;
     }
 
     // Firmas
     doc.text('Firma de quien recibe:',40,y,{align:'center'}); y+=6;
-    doc.text('_______________________',40,y,{align:'center'}); y+=8;
+    doc.text('_____________________________',40,y,{align:'center'}); y+=8;
     doc.text('Nombre de quien recibe:',40,y,{align:'center'}); y+=6;
-    doc.text('_______________________',40,y,{align:'center'}); y+=8;
+    doc.text('_____________________________',40,y,{align:'center'}); y+=8;
     doc.text('Firma de quien entrega:',40,y,{align:'center'}); y+=6;
-    doc.text('_______________________',40,y,{align:'center'}); y+=12;
+    doc.text('_____________________________',40,y,{align:'center'}); y+=12;
 
     // Texto final SI/NO
     doc.text('Se reciben correctamente todos los productos:',40,y,{align:'center'});
@@ -279,6 +281,13 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
     doc.text('MarckBusiness © 2025 — Todos los derechos reservados',40,y,{align:'center'});
 
     doc.save('ListaProductos.pdf');
+
+    // Abrir WhatsApp según sucursal
+    let waNumber='';
+    if(branch==='Roosevelt') waNumber='51330598';
+    else if(branch==='SanCristobal') waNumber='39161962';
+    else if(branch==='AtlanticPlaza') waNumber='36704724';
+    if(waNumber) window.open(`https://wa.me/${waNumber}`,'_blank');
   }
 });
 
@@ -288,5 +297,3 @@ document.getElementById('sendJuanBtn').addEventListener('click', ()=>{
 </script>
 </body>
 </html>
-
-
