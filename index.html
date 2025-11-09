@@ -1,37 +1,49 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TRASLADOS LAS PICONAS</title>
 
-<!-- jsPDF + AutoTable -->
+<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <style>
-/* =========================
-   Estilos: oscuro + acento verde
-   ========================= */
+/* -------------------------
+   Diseño profesional (tonos oscuros + verde neón)
+   -------------------------*/
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulseGreen {
+  0%,100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(37,211,102,0.18)); }
+  50% { transform: scale(1.06); filter: drop-shadow(0 0 12px rgba(37,211,102,0.30)); }
+}
+@keyframes heartbeat {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
 :root{
-  --bg: #0b0f14;
+  --bg:#0b0f14;
   --panel: rgba(0,0,0,0.62);
   --accent: #25D366;
   --accent-2: #1ae15e;
   --muted: rgba(255,255,255,0.06);
   --glass: rgba(255,255,255,0.03);
-  --white: #e8f5e9;
 }
 
-*{box-sizing:border-box}
-html,body{height:100%}
 body{
+  font-family: 'Poppins', Arial, sans-serif;
+  background: var(--bg) url('FONDO PARA LISTA.jpg') no-repeat center center fixed;
+  background-size: cover;
   margin:0;
-  font-family: "Poppins", Arial, sans-serif;
-  background: var(--bg) url('FONDO PARA LISTA.jpg') center/cover no-repeat fixed;
-  color:var(--white);
+  color: #e8f5e9;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
+  animation: fadeIn .5s ease;
 }
 
 /* Header */
@@ -42,33 +54,33 @@ header{
   padding:18px 24px;
   background: rgba(0,0,0,0.78);
   box-shadow: 0 8px 30px rgba(0,0,0,0.65);
-  position:relative;
+  position: relative;
 }
 #logo{
-  width:420px;
+  width:380px;
   height:auto;
   object-fit:contain;
 }
 header h1{
   flex:1;
   text-align:center;
-  margin:0 12px;
+  margin:0;
   font-size:1.9rem;
   color:var(--accent);
   text-shadow: 0 0 8px rgba(37,211,102,0.12);
 }
 #currentDate{
   position:absolute;
-  right:140px;
+  right:120px;
   top:12px;
   font-family:'Courier New', monospace;
-  font-size:1.6rem;
+  font-size:1.5rem; /* hora grande */
   color:var(--accent);
   font-weight:700;
-  text-align:right;
+  animation: pulseGreen 2.6s infinite;
 }
 
-/* countdown circle position */
+/* Circular countdown under the date (positioned under currentDate) */
 .countdown-wrap{
   position:absolute;
   right:18px;
@@ -78,90 +90,113 @@ header h1{
   display:flex;
   align-items:center;
   justify-content:center;
+  pointer-events:none;
+}
+.countdown-svg{
+  width:72px;
+  height:72px;
 }
 
-/* Main panel */
+/* Container (más ancho) */
 .container{
-  max-width:1100px;
+  max-width:1120px; /* más ancho */
   margin:26px auto;
-  padding:22px;
+  padding:24px;
   background: var(--panel);
   border-radius:12px;
   box-shadow:0 10px 40px rgba(0,0,0,0.72);
+  animation: fadeIn .6s ease;
 }
 
-/* form-group */
+/* Form group */
 .form-group{
   display:flex;
   gap:12px;
+  margin-bottom:14px;
   flex-wrap:wrap;
   align-items:center;
   justify-content:center;
-  margin-bottom:14px;
 }
-input[type="text"], input[type="number"], select{
+select, input{
   padding:12px;
   border-radius:8px;
   border:none;
   font-size:1rem;
   flex:1;
-  min-width:160px;
   background: var(--glass);
-  color:var(--white);
-  transition: box-shadow .18s ease;
+  color: #fff;
+  transition: box-shadow .18s ease, transform .06s ease;
 }
-input[type="number"]{ width:110px; }
+select:focus, input:focus {
+  outline: none;
+  box-shadow: 0 10px 28px rgba(37,211,102,0.10);
+}
 
-/* buttons */
+/* Buttons */
 button{
-  padding:12px 16px;
-  border-radius:8px;
+  padding:12px 18px;
   border:none;
-  font-weight:700;
+  border-radius:8px;
   cursor:pointer;
+  font-weight:700;
+  font-size:1rem;
   transition: transform .12s ease, box-shadow .12s ease;
 }
-#addBtn{ background:var(--accent); color:#000; }
-#addBtn:hover{ transform:translateY(-3px); box-shadow:0 10px 30px rgba(37,211,102,0.12); }
+#addBtn{ background:var(--accent); color:#001; }
+#addBtn:hover{ transform: translateY(-3px); box-shadow:0 8px 22px rgba(37,211,102,0.18); }
 #cleanBtn{
-  width:46px; height:46px; border-radius:50%;
+  width:44px; height:44px; border-radius:50%;
   border:2px solid var(--accent); background:transparent; color:var(--accent);
 }
-#cleanBtn:hover{ background:var(--accent); color:#000; transform:rotate(8deg); }
+#cleanBtn:hover{ background:var(--accent); color:#000; transform: rotate(8deg); box-shadow:0 8px 22px rgba(37,211,102,0.12); }
+#generatePDF{ background:var(--accent); color:#001; }
+#generatePDF:hover{ transform: translateY(-3px); box-shadow:0 8px 22px rgba(37,211,102,0.18); }
+#sendJuanBtn{ background:transparent; color:var(--accent); border:2px solid var(--accent); }
+#sendJuanBtn:hover{ background:var(--accent); color:#000; transform: translateY(-3px); }
 
 /* Table */
 table{
   width:100%;
   border-collapse:collapse;
   margin-top:12px;
-  background: rgba(255,255,255,0.02);
-  border-radius:8px;
+  background: rgba(255,255,255,0.01);
+  border-radius:10px;
   overflow:hidden;
-  box-shadow: inset 0 -1px 0 rgba(255,255,255,0.02);
 }
-th, td{
-  padding:10px;
-  text-align:center;
-  font-size:1rem;
-  border-bottom:1px solid rgba(255,255,255,0.04);
-}
+table, th, td{ border-bottom:1px solid rgba(255,255,255,0.04); }
 th{
-  background: rgba(37,211,102,0.05);
+  background: rgba(37,211,102,0.06);
   color:var(--accent);
   font-weight:800;
+  padding:12px;
 }
-tbody tr:hover{ background: rgba(37,211,102,0.06); }
+td{
+  padding:10px;
+  text-align:center;
+  color:#e6f4ea;
+}
+tbody tr:hover{ background: rgba(37,211,102,0.05); }
 
-/* delete button in table */
+/* Delete button inside table */
 .table-delete-btn{
-  background:#ff4d4d;color:#fff;border:none;border-radius:6px;padding:6px 8px;cursor:pointer;
+  background:#ff5c5c;
+  color:white;
+  border:none;
+  border-radius:6px;
+  padding:6px 8px;
+  cursor:pointer;
 }
 
-/* saved lists */
-#savedLists{ margin-top:18px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-#savedLists h3{ width:100%; margin:0 0 8px 0; color:#cfefd2 }
+/* Saved lists area */
+#savedLists{
+  margin-top:18px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+#savedLists h3{ width:100%; margin:0 0 6px 0; color:#cde9d1; }
 
-/* floating support (right, no bg, clickable to whatsapp) */
+/* Floating LOGOMARCK support button (bottom-right) - sin fondo */
 .floating-support{
   position:fixed;
   right:18px;
@@ -171,16 +206,26 @@ tbody tr:hover{ background: rgba(37,211,102,0.06); }
   flex-direction:column;
   align-items:center;
   gap:6px;
+  pointer-events:none; /* no action */
 }
 .support-btn{
-  width:64px;height:64px;border-radius:50%;background:transparent;border:2px solid rgba(255,255,255,0.06);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
-  animation: heartbeat 1.9s infinite;
+  width:64px;
+  height:64px;
+  border-radius:50%;
+  background:transparent; /* sin fondo */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+  cursor:default;
+  animation: heartbeat 2s infinite;
+  border: 2px solid rgba(255,255,255,0.03);
+  pointer-events: auto; /* allow hover but keep no click action if desired */
 }
-.support-btn img{ width:44px;height:44px;object-fit:contain; display:block; }
-.support-label{ color:#cfeed8;font-size:0.85rem; }
+.support-btn img{ width:44px; height:44px; object-fit:contain; display:block; animation: pulseGreen 2.2s infinite; }
+.support-label{ font-size:0.85rem; color:#cfeed8; text-shadow:0 2px 6px rgba(0,0,0,0.6); pointer-events:none; }
 
-/* floating delete-all left */
+/* Floating delete-all button (bottom-left) */
 .floating-delete{
   position:fixed;
   left:18px;
@@ -192,53 +237,60 @@ tbody tr:hover{ background: rgba(37,211,102,0.06); }
   gap:6px;
 }
 .delete-btn{
-  width:64px;height:64px;border-radius:50%;background:transparent;border:2px solid rgba(255,255,255,0.06);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--accent);font-weight:700;
+  width:64px;
+  height:64px;
+  border-radius:50%;
+  background: transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:2px solid rgba(255,255,255,0.06);
+  color:var(--accent);
+  font-weight:700;
+  cursor:pointer;
+  transition: transform .14s ease, box-shadow .14s ease;
 }
-.delete-label{ color:#f7c6c6;font-size:0.85rem; }
+.delete-btn:hover{ transform: scale(1.05); box-shadow: 0 10px 26px rgba(37,211,102,0.08); }
+.delete-label{ font-size:0.85rem; color:#f7c6c6; pointer-events:none; }
 
-/* countdown svg text styling */
-.countdown-text { font-family: 'Courier New', monospace; font-weight:700; fill: var(--accent); }
-
-/* responsive */
+/* Small responsiveness */
 @media (max-width:920px){
   header h1{ font-size:1.3rem; }
   #logo{ width:260px; }
   #currentDate{ font-size:1.05rem; right:100px; top:8px; }
+  .countdown-wrap{ top:60px; right:12px; }
   .container{ margin:12px; padding:12px; }
 }
-@keyframes heartbeat { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
 </style>
 </head>
+
 <body>
 
-<!-- HEADER -->
 <header>
-  <img src="LOGO1 (2).png" id="logo" alt="Logo"/>
+  <img src="LOGO1 (2).png" alt="Logo" id="logo">
   <h1>REGISTRO DE PRODUCTOS PARA TRASLADO</h1>
 
-  <!-- hora grande -->
+  <!-- Hora grande -->
   <div id="currentDate"></div>
 
-  <!-- countdown circle -->
+  <!-- Reloj circular (cuenta regresiva por minuto) - SVG -->
   <div class="countdown-wrap" aria-hidden="true">
-    <svg viewBox="0 0 100 100" width="72" height="72">
+    <svg class="countdown-svg" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.04)" stroke-width="8" fill="none"></circle>
+      <circle id="progressCircle" cx="50" cy="50" r="44" stroke="url(#grad)" stroke-width="8" fill="none"
+              stroke-linecap="round" transform="rotate(-90 50 50)"></circle>
       <defs>
-        <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#25D366" />
-          <stop offset="100%" stop-color="#1ae15e" />
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#25D366"/>
+          <stop offset="100%" stop-color="#1ae15e"/>
         </linearGradient>
       </defs>
-      <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.04)" stroke-width="8" fill="none"></circle>
-      <circle id="progressCircle" cx="50" cy="50" r="44" stroke="url(#g1)" stroke-width="8" stroke-linecap="round" fill="none" transform="rotate(-90 50 50)"></circle>
-      <text id="countdownText" x="50" y="56" text-anchor="middle" class="countdown-text" font-size="18">60</text>
+      <text id="countdownText" x="50" y="55" text-anchor="middle" font-family="Courier New" font-size="18" fill="#25D366">60</text>
     </svg>
   </div>
 </header>
 
-<!-- MAIN -->
 <div class="container">
-
   <div class="form-group">
     <input type="text" id="productName" placeholder="Nombre del producto">
     <input type="number" id="productQty" placeholder="Cantidad">
@@ -252,9 +304,8 @@ tbody tr:hover{ background: rgba(37,211,102,0.06); }
       <option value="TERM">TERM</option>
       <option value="PRC">PRC</option>
     </select>
-
     <button id="addBtn">Agregar</button>
-    <button id="cleanBtn" title="Limpiar factura">🗑</button>
+    <button id="cleanBtn">🗑</button>
   </div>
 
   <table id="itemsTable" aria-live="polite">
@@ -283,61 +334,58 @@ tbody tr:hover{ background: rgba(37,211,102,0.06); }
     <button id="sendJuanBtn">Enviar a Juan Luis</button>
   </div>
 
+  <!-- Saved lists (botones por cada guardado del día) -->
   <div id="savedLists">
     <h3>Listas Guardadas</h3>
-    <!-- botones dinámicos -->
+    <!-- botones generados dinámicamente -->
   </div>
-
 </div>
 
-<!-- floating support (opens WhatsApp) -->
-<div class="floating-support" aria-hidden="false">
-  <div class="support-btn" id="supportBtn" title="Soporte">
+<!-- Floating support button (LOGOMARCK) - no action on click -->
+<div class="floating-support" aria-hidden="true">
+  <div class="support-btn" title="Soporte">
     <img src="LOGOMARCK.png" alt="LOGOMARCK">
   </div>
   <div class="support-label">Soporte</div>
 </div>
 
-<!-- floating delete-all -->
+<!-- Floating delete-all button bottom-left -->
 <div class="floating-delete" aria-hidden="true">
-  <div class="delete-btn" id="deleteAllBtn" title="Borrar todo">🗑</div>
+  <button class="delete-btn" id="deleteAllBtn" title="Borrar todo">🗑</button>
   <div class="delete-label">Borrar todo</div>
 </div>
 
-<!-- sound -->
 <audio id="addSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
 
 <script>
 /* ===========================
-   Código completo y consolidado
-   Mantiene TODA la lógica original
-   + mejoras solicitadas
+   Preservar la lógica original
+   + agregar guardado y UI extras
    =========================== */
-
-const STORAGE_KEY = "trasladosGuardados";
 
 const items = [];
 const tbody = document.querySelector('#itemsTable tbody');
 const currentDateEl = document.getElementById('currentDate');
 const addSound = document.getElementById('addSound');
 const savedListsContainer = document.getElementById('savedLists');
-
 const countdownText = document.getElementById('countdownText');
 const progressCircle = document.getElementById('progressCircle');
-const CIRCLE_R = 44;
-const CIRCLE_C = 2 * Math.PI * CIRCLE_R;
-progressCircle.style.strokeDasharray = `${CIRCLE_C}`;
-progressCircle.style.strokeDashoffset = `0`;
 
-/* --------------------------
-   Fecha / Hora / Countdown
-   -------------------------- */
+const STORAGE_KEY = "trasladosGuardados";
+
+/* ----- Fecha/hora y contador ----- */
 function updateDate(){
   const now = new Date();
   currentDateEl.textContent = now.toLocaleString();
 }
 updateDate();
 setInterval(updateDate, 1000);
+
+/* Countdown circular (progress) - 60 seconds */
+const CIRCLE_RADIUS = 44;
+const CIRCLE_CIRC = 2 * Math.PI * CIRCLE_RADIUS; // circumference
+progressCircle.style.strokeDasharray = `${CIRCLE_CIRC}`;
+progressCircle.style.strokeDashoffset = `0`;
 
 let countdownSec = 60;
 function syncAndStartCountdown(){
@@ -348,51 +396,48 @@ function syncAndStartCountdown(){
   clearInterval(window._countdownInterval);
   window._countdownInterval = setInterval(()=>{
     countdownSec--;
-    if(countdownSec <= 0) countdownSec = 60;
+    if(countdownSec <= 0){
+      countdownSec = 60;
+    }
     updateCountdownUI(countdownSec);
   }, 1000);
 }
 function updateCountdownUI(sec){
   countdownText.textContent = sec;
-  const progress = sec / 60;
-  const dash = CIRCLE_C * (1 - progress);
+  // progress: 60 -> 0  (we want the stroke to reduce from full to 0)
+  const progress = sec / 60; // 1 -> 0
+  const dash = CIRCLE_CIRC * (1 - progress); // consumed part
   progressCircle.style.strokeDashoffset = `${dash}`;
 }
 syncAndStartCountdown();
-setInterval(syncAndStartCountdown, 30000);
+setInterval(syncAndStartCountdown, 30000); // re-sync every 30s
 
-/* --------------------------
-   Render tabla / CRUD items
-   -------------------------- */
+/* ----- Render tabla (igual que antes) ----- */
 function renderTable(){
-  tbody.innerHTML = '';
-  items.forEach((it, index)=>{
+  tbody.innerHTML='';
+  items.forEach((it,index)=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${escapeHtml(it.name)}</td>
-                    <td>${escapeHtml(it.qty)}</td>
-                    <td>${escapeHtml(it.unit)}</td>
-                    <td>${escapeHtml(it.supplier)}</td>
-                    <td></td>
+    tr.innerHTML = `<td>${it.name}</td>
+                    <td>${it.qty}</td>
+                    <td>${it.unit}</td>
+                    <td>${it.supplier}</td>
+                    <td>[ ]</td>
                     <td><button class="table-delete-btn" onclick="deleteItem(${index})">❌</button></td>`;
     tbody.appendChild(tr);
   });
 }
 
-/* Escapar HTML para seguridad básica */
-function escapeHtml(s){
-  if(typeof s !== 'string' && typeof s !== 'number') return '';
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-/* delete item */
+/* ----- Eliminar item (igual) ----- */
 function deleteItem(index){
   items.splice(index,1);
   renderTable();
-  autosaveToday();
+  autosaveToday(); // update saved copy
 }
-window.deleteItem = deleteItem; // para onclick inline
 
-/* agregar producto */
+/* Hacer funciones globales (mantener compatibilidad con onclick inline) */
+window.deleteItem = deleteItem;
+
+/* ----- Agregar producto (igual) ----- */
 document.getElementById('addBtn').addEventListener('click', ()=>{
   const name = document.getElementById('productName').value.trim();
   const qty = document.getElementById('productQty').value;
@@ -407,26 +452,31 @@ document.getElementById('addBtn').addEventListener('click', ()=>{
   document.getElementById('productUnit').value='';
   document.getElementById('productName').focus();
 
+  // Guardar automáticamente en localStorage al agregar (mantener la lista del día)
   autosaveToday();
 });
 
-/* Enter para agregar */
+/* Enter para agregar (igual) */
 document.getElementById('productName').addEventListener('keypress', (e)=>{
-  if(e.key === 'Enter') document.getElementById('addBtn').click();
+  if(e.key==='Enter'){ document.getElementById('addBtn').click(); }
 });
 
-/* clean button */
+/* ----- Limpiar lista (igual) ----- */
 document.getElementById('cleanBtn').addEventListener('click', ()=>{
   if(confirm("¿Desea limpiar toda la lista?")){
-    items.length = 0;
+    items.length=0;
     renderTable();
     autosaveToday();
   }
 });
 
 /* =========================
-   Guardado local (por día)
-   ========================= */
+   Guardado local (localStorage)
+   - Guardar por día y sucursal
+   - Solo permitir cargar/modificar si es del mismo día
+   =========================*/
+
+/* Cargar las listas guardadas en la UI */
 function loadSavedLists(){
   savedListsContainer.innerHTML = "<h3>Listas Guardadas</h3>";
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
@@ -444,7 +494,7 @@ function loadSavedLists(){
   });
 }
 
-/* cargar una lista (solo del mismo día) */
+/* Cargar una lista guardada (solo si es del mismo dia) */
 function loadList(index){
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
   const selected = saved[index];
@@ -455,14 +505,14 @@ function loadList(index){
     return;
   }
   items.length = 0;
-  selected.items.forEach(it => items.push(it));
+  selected.items.forEach(it=> items.push(it));
   renderTable();
   document.getElementById("branch").value = selected.sucursal;
   document.getElementById("operator").value = selected.operador || '';
   alert("Lista cargada correctamente. Puedes seguir agregando productos.");
 }
 
-/* guardar lista del día para sucursal */
+/* Guardar (o reemplazar) la lista del día para la sucursal actual */
 function saveTodayListForBranch(branch, operator){
   const now = new Date();
   const today = now.toLocaleDateString();
@@ -478,237 +528,183 @@ function saveTodayListForBranch(branch, operator){
   loadSavedLists();
 }
 
-/* autosave convenience */
+/* Auto-save convenience: if branch selected, save automatically */
 function autosaveToday(){
   const branch = document.getElementById('branch').value;
   const operator = document.getElementById('operator').value.trim();
-  if(branch) saveTodayListForBranch(branch, operator);
+  if(branch){
+    saveTodayListForBranch(branch, operator);
+  }
 }
 
-/* cargar guardados al iniciar */
+/* Cargar listas al iniciar */
 loadSavedLists();
 
-/* --------------------------
-   Generar PDF (fix: esperar carga de logos)
-   - blanco y negro
-   - líneas más gruesas
-   - columna Recibido vacía
-   - fecha y hora separados y alineados a la izquierda
-   - LOGOMARCK al final pequeño y proporcional
-   - firmas más largas
-   - ajustar altura final para que la impresión solo ocupe datos
-   -------------------------- */
+/* ---------------------------
+   Generar PDF (mejor manejo logo y firma)
+   --------------------------- */
 document.getElementById('generatePDF').addEventListener('click', ()=>{
-  if(items.length === 0){ alert('No hay productos'); return; }
+  if(items.length===0){ alert('No hay productos'); return; }
   const operator = document.getElementById('operator').value.trim();
   const branch = document.getElementById('branch').value;
   if(!branch){ alert('Seleccione sucursal'); return; }
   if(!operator){ alert('Ingrese quién realiza el procedimiento'); return; }
 
-  // guardar antes
+  // Guardar localmente antes de generar PDF
+  const now = new Date();
   saveTodayListForBranch(branch, operator);
 
   const { jsPDF } = window.jspdf;
-  // Creamos PDF amplio en altura y luego reducimos con internal page size hack
   const doc = new jsPDF({unit:'mm', format:[80, 3000]}); // 80mm ancho
-  let y = 6;
-  const marginLeft = 6;
 
-  // Load header logo and final logo then draw everything
-  const headerLogo = new Image();
-  headerLogo.src = 'LOGO1 (2).png';
-  const finalLogo = new Image();
-  finalLogo.src = 'LOGOMARCK.png';
+  let y = 10;
+  const logoImg = new Image();
+  logoImg.src = 'LOGO1 (2).png';
 
-  // We'll wait for both images to load (or time out) then render PDF content
-  let headerLoaded = false, finalLoaded = false, timedOut = false;
-
-  headerLogo.onload = ()=>{ headerLoaded = true; tryRenderPDF(); };
-  headerLogo.onerror = ()=>{ headerLoaded = true; tryRenderPDF(); };
-  finalLogo.onload = ()=>{ finalLoaded = true; tryRenderPDF(); };
-  finalLogo.onerror = ()=>{ finalLoaded = true; tryRenderPDF(); };
-
-  // fallback timeout to avoid waiting forever
-  const startTime = Date.now();
-  const timeoutMs = 1800; // 1.8s
-
-  function tryRenderPDF(){
-    // proceed if both loaded OR timeout passed
-    if((headerLoaded && finalLoaded) || (Date.now() - startTime) > timeoutMs){
-      if((Date.now() - startTime) > timeoutMs) timedOut = true;
-      renderPdfNow();
-    }
-  }
-
-  function renderPdfNow(){
+  logoImg.onload = () => {
     try {
-      // Add header logo if available and not timed out
-      if(!timedOut && headerLogo && headerLoaded){
-        try {
-          const maxWidth = 60; // mm
-          const ratio = (headerLogo.naturalWidth && headerLogo.naturalHeight) ? (headerLogo.naturalWidth / headerLogo.naturalHeight) : 1;
-          const w = Math.min(maxWidth, 60);
-          const h = w / ratio;
-          doc.addImage(headerLogo, 'PNG', marginLeft, y, w, h);
-          y += h + 2;
-        } catch(e){
-          y += 8;
-        }
-      } else {
-        // small top spacing
-        y += 8;
-      }
-    } catch(e){ y += 8; }
+      const maxWidth = 60; // mm
+      const imgRatio = logoImg.naturalWidth / logoImg.naturalHeight || 1;
+      const imgW = Math.min(maxWidth, logoImg.naturalWidth * 0.1);
+      // compute height by ratio
+      const imgH = imgW / imgRatio;
+      doc.addImage(logoImg, 'PNG', 10, y, imgW, imgH);
+      y += imgH + 2;
+    } catch(err){
+      y += 10;
+    }
 
-    // Fecha y Hora por separado, alineados a la izquierda
-    const now = new Date();
-    doc.setFontSize(9);
-    doc.setTextColor(0,0,0); // negro
-    doc.text(`Fecha: ${now.toLocaleDateString()}`, marginLeft, y);
-    y += 5;
-    doc.text(`Hora: ${now.toLocaleTimeString()}`, marginLeft, y);
+    const now2 = new Date();
+    doc.setFontSize(10);
+    doc.text(`Sucursal: ${branch}`, 40, y, {align:'center'});
+    doc.text(`Fecha: ${now2.toLocaleDateString()} ${now2.toLocaleTimeString()}`,70,10,{align:'right'});
+    y += 6;
+    doc.text(`Quién realiza: ${operator}`,40,y,{align:'center'});
     y += 6;
 
-    // Quién realiza y sucursal (alineado izquierda)
-    doc.text(`Quién realiza: ${operator}`, marginLeft, y);
-    y += 5;
-    doc.text(`Sucursal destino: ${branch}`, marginLeft, y);
-    y += 8;
-
-    // Prepare table head/body in B/N
-    const head = [['Producto','Cantidad','Unidad','Proveedor','Recibido']];
-    const body = items.map(it => [it.name, it.qty, it.unit, it.supplier, '']); // recibo vacío
-
-    // Use autoTable with black lines and larger lineWidth
     doc.autoTable({
       startY: y,
-      head: head,
-      body: body,
-      theme: 'grid',
-      styles: {
-        fontSize: 9,
-        textColor: 0,
-        halign: 'center',
-        valign: 'middle',
-        cellPadding: 2,
-        lineColor: 0,
-        lineWidth: 0.6 // líneas gruesas
-      },
-      headStyles: {
-        fillColor: [255,255,255],
-        textColor: 0,
-        halign: 'center',
-        fontStyle: 'bold',
-        lineWidth: 0.8
-      },
-      margin: { left: marginLeft, right: 2 },
-      tableLineColor: [0,0,0],
-      tableLineWidth: 0.6
+      theme:'grid',
+      head: [['Producto','Cantidad','Unidad','Proveedor','Recibido']],
+      body: items.map(it=>[it.name,it.qty,it.unit,it.supplier,'[ ]']),
+      styles:{ fontSize:9, cellPadding:1 },
+      margin:{left:2,right:2},
+      tableWidth: 'auto'
     });
 
-    y = doc.lastAutoTable ? doc.lastAutoTable.finalY + 6 : y + 10;
+    y = doc.lastAutoTable.finalY + 10;
 
-    // Observaciones (alineadas izquierda)
-    doc.setFontSize(9);
-    doc.text('Observaciones:', marginLeft, y);
-    y += 6;
+    doc.text('Observaciones:',40,y,{align:'center'}); y+=6;
     for(let i=0;i<3;i++){
-      doc.text('______________________________________________________________', marginLeft, y);
-      y += 7;
+      doc.text('______________________________',40,y,{align:'center'});
+      y+=8;
     }
-    y += 2;
 
-    // Firmas (más largas)
-    doc.text('Firma de quien recibe:', marginLeft, y); y += 6;
-    doc.text('______________________________________________________________', marginLeft, y); y += 8;
-    doc.text('Nombre de quien recibe:', marginLeft, y); y += 6;
-    doc.text('______________________________________________________________', marginLeft, y); y += 8;
-    doc.text('Firma de quien entrega:', marginLeft, y); y += 6;
-    doc.text('______________________________________________________________', marginLeft, y); y += 12;
+    doc.text('Firma de quien recibe:',40,y,{align:'center'}); y+=6;
+    doc.text('______________________________',40,y,{align:'center'}); y+=8;
+    doc.text('Nombre de quien recibe:',40,y,{align:'center'}); y+=6;
+    doc.text('______________________________',40,y,{align:'center'}); y+=8;
+    doc.text('Firma de quien entrega:',40,y,{align:'center'}); y+=6;
+    doc.text('______________________________',40,y,{align:'center'}); y+=12;
 
-    // SI/NO boxes (vacíos)
-    doc.text('Se reciben correctamente todos los productos:', marginLeft, y); y += 6;
-    doc.rect(marginLeft + 8, y, 6, 6); doc.text('SI', marginLeft + 18, y + 5);
-    doc.rect(marginLeft + 36, y, 6, 6); doc.text('NO', marginLeft + 46, y + 5);
-    y += 12;
+    doc.text('Se reciben correctamente todos los productos:',40,y,{align:'center'});
+    y+=6;
+    doc.rect(20,y,6,6); doc.text('SI',28,y+5);
+    doc.rect(45,y,6,6); doc.text('NO',53,y+5);
+    y+=12;
 
-    // LOGOMARCK pequeño al final, centrado (si cargó)
-    if(!timedOut && finalLogo && finalLoaded){
+    // LOGOMARCK small and signature (ensure aspect ratio)
+    const logo2 = new Image();
+    logo2.src = 'LOGOMARCK.png';
+    logo2.onload = () => {
       try {
         const maxW = 30; // mm
-        const ratio2 = (finalLogo.naturalWidth && finalLogo.naturalHeight) ? (finalLogo.naturalWidth / finalLogo.naturalHeight) : 1;
-        const w2 = maxW;
-        const h2 = w2 / ratio2;
-        const x2 = (80 - w2) / 2;
-        doc.addImage(finalLogo, 'PNG', x2, y, w2, h2);
-        y += h2 + 6;
-      } catch(e){
-        y += 6;
+        const ratio = (logo2.naturalWidth && logo2.naturalHeight) ? (logo2.naturalWidth / logo2.naturalHeight) : 1;
+        const w = maxW;
+        const h = w / ratio;
+        const x = (80 - w) / 2;
+        doc.addImage(logo2, 'PNG', x, y, w, h);
+        y += h + 6;
+      } catch (e){
+        y += 4;
       }
-    } else {
-      y += 6;
-    }
 
-    // Firma final (sin "Todos los derechos reservados")
-    doc.setFontSize(9);
-    doc.text('Sistema Marck Business © 2025', 40, y, { align: 'center' });
-    y += 8;
+      // Firma (solo "Sistema Marck Business © 2025")
+      doc.setFontSize(9);
+      doc.text('Sistema Marck Business © 2025', 40, y, {align:'center'});
+      y += 8;
 
-    // Ajuste de "altura de página" para impresión: acortar altura usando internal.pageSize
-    try {
-      const finalHeight = Math.ceil(y + 12); // mm
-      if(finalHeight > 0){
-        doc.internal.pageSize.height = finalHeight;
-        if(doc.internal && doc.internal.pageSize) doc.internal.pageSize.h = finalHeight;
-      }
-    } catch(e){
-      // ignore
-    }
+      const fileName = `Lista_${branch}_${now2.getFullYear()}-${now2.getMonth()+1}-${now2.getDate()}.pdf`;
+      doc.save(fileName);
 
-    // Guardar archivo con nombre
-    const now2 = new Date();
-    const fileName = `Lista_${branch}_${now2.getFullYear()}-${now2.getMonth()+1}-${now2.getDate()}.pdf`;
-    doc.save(fileName);
+      // Limpiar tabla y sucursal (tal como pediste)
+      items.length = 0;
+      renderTable();
+      document.getElementById('branch').value = '';
 
-    // Limpiar tabla y sucursal (según petición previa)
+      // Abrir WhatsApp según sucursal (igual)
+      let number='';
+      if(branch==='Roosevelt') number='51330598';
+      if(branch==='SanCristobal') number='39161962';
+      if(branch==='AtlanticPlaza') number='36704724';
+      if(number) window.open(`https://wa.me/${number}`,'_blank');
+    }; // logo2.onload
+  }; // logoImg.onload
+
+  // fallback timeout if images fail to load
+  setTimeout(() => {
+    if(items.length === 0) return;
+    // Similar minimal fallback (without images)
+    const now3 = new Date();
+    const doc2 = new jsPDF({unit:'mm', format:[80, 3000]});
+    let y2 = 10;
+    doc2.setFontSize(10);
+    doc2.text(`Sucursal: ${document.getElementById('branch').value}`, 40, y2+6, {align:'center'});
+    doc2.text(`Fecha: ${now3.toLocaleDateString()} ${now3.toLocaleTimeString()}`,70,10,{align:'right'});
+    y2 += 12;
+    doc2.text(`Quién realiza: ${document.getElementById('operator').value}`,40,y2,{align:'center'});
+    y2 += 8;
+    doc2.autoTable({
+      startY: y2,
+      theme:'grid',
+      head: [['Producto','Cantidad','Unidad','Proveedor','Recibido']],
+      body: items.map(it=>[it.name,it.qty,it.unit,it.supplier,'[ ]']),
+      styles:{ fontSize:9, cellPadding:1 },
+      margin:{left:2,right:2},
+      tableWidth: 'auto'
+    });
+    y2 = doc2.lastAutoTable.finalY + 10;
+    doc2.text('Observaciones:',40,y2,{align:'center'}); y2+=6;
+    for(let i=0;i<3;i++){ doc2.text('______________________________',40,y2,{align:'center'}); y2+=8; }
+    doc2.text('Sistema Marck Business © 2025',40,y2+10,{align:'center'});
+    const fileName2 = `Lista_${document.getElementById('branch').value}_${now3.getFullYear()}-${now3.getMonth()+1}-${now3.getDate()}.pdf`;
+    doc2.save(fileName2);
+
     items.length = 0;
     renderTable();
     document.getElementById('branch').value = '';
 
-    // Abrir WhatsApp según sucursal (igual que antes)
-    let number = '';
-    if(branch === 'Roosevelt') number = '51330598';
-    if(branch === 'SanCristobal') number = '39161962';
-    if(branch === 'AtlanticPlaza') number = '36704724';
+    let number='';
+    const branchNow = document.getElementById('branch').value;
+    if(branchNow==='Roosevelt') number='51330598';
+    if(branchNow==='SanCristobal') number='39161962';
+    if(branchNow==='AtlanticPlaza') number='36704724';
     if(number) window.open(`https://wa.me/${number}`,'_blank');
-  } // renderPdfNow
+
+  }, 1600);
 });
 
-/* --------------------------
-   Enviar a Juan Luis (botón)
-   -------------------------- */
+/* ----- Enviar a Juan Luis (igual) ----- */
 document.getElementById('sendJuanBtn').addEventListener('click', ()=>{
-  if(items.length === 0){ alert('No hay productos para enviar.'); return; }
-  const branch = document.getElementById('branch').value;
-  const operator = document.getElementById('operator').value.trim();
-  if(!branch || !operator){ alert('Complete sucursal y operador antes de enviar.'); return; }
-
-  // Guardar antes de enviar
-  saveTodayListForBranch(branch, operator);
-  // Abrimos WhatsApp con número de Juan Luis (según tu sistema)
   window.open('https://wa.me/58140621','_blank');
-  alert('Lista guardada y ventana de WhatsApp abierta (Juan Luis).');
 });
 
-/* --------------------------
-   Botón BORRAR TODO (flotante izquierdo)
-   - pide clave: "POR FAVOR INGRESE LA CLAVE DE JUAN LUIS" -> 22782522
-   - si correcta borra todas las listas guardadas (localStorage)
-   -------------------------- */
+/* ----- BOTÓN BORRAR TODO (flotante izquierdo) ----- */
 document.getElementById('deleteAllBtn').addEventListener('click', ()=>{
   const key = prompt("POR FAVOR INGRESE LA CLAVE DE JUAN LUIS");
-  if(key === null) return; // cancel
+  if(key === null) return; // cancel pressed
   if(key.trim() === "22782522"){
+    // delete all saved lists from localStorage
     localStorage.removeItem(STORAGE_KEY);
     loadSavedLists();
     alert("Todas las listas guardadas han sido borradas.");
@@ -717,18 +713,9 @@ document.getElementById('deleteAllBtn').addEventListener('click', ()=>{
   }
 });
 
-/* --------------------------
-   Soporte flotante (LOGOMARCK) abre WhatsApp +50241529411
-   -------------------------- */
-document.getElementById('supportBtn').addEventListener('click', ()=>{
-  window.open('https://wa.me/50241529411','_blank');
-});
-
-/* Inicial */
-renderTable();
+/* Cargar saved lists al iniciar */
 loadSavedLists();
 
 </script>
 </body>
 </html>
-
