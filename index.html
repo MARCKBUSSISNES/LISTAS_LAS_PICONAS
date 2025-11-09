@@ -305,18 +305,18 @@ tbody tr:hover{ background: rgba(37,211,102,0.05); }
       <option value="PRC">PRC</option>
     </select>
     <button id="addBtn">Agregar</button>
-    <button id="cleanBtn">🗑</button>
+    <button id="cleanBtn">CLEAR</button>
   </div>
 
   <table id="itemsTable" aria-live="polite">
     <thead>
       <tr>
-        <th>Producto</th>
-        <th>Cantidad</th>
-        <th>Unidad</th>
-        <th>Proveedor</th>
-        <th>Recibido</th>
-        <th>Borrar</th>
+        <th>PRODUCTO</th>
+        <th>CANTIDAD</th>
+        <th>UNIDAD</th>
+        <th>PROVEEDOR</th>
+        <th>RECIBIDO</th>
+        <th>BORRAR</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -352,7 +352,7 @@ tbody tr:hover{ background: rgba(37,211,102,0.05); }
 <!-- Floating delete-all button bottom-left -->
 <div class="floating-delete" aria-hidden="true">
   <button class="delete-btn" id="deleteAllBtn" title="Borrar todo">🗑</button>
-  <div class="delete-label">Borrar todo</div>
+  <div class="delete-label">CLEAR ALL</div>
 </div>
 
 <audio id="addSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
@@ -631,7 +631,7 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
 
       // Firma (solo "Sistema Marck Business © 2025")
       doc.setFontSize(9);
-      doc.text('Sistema Marck Business © 2025', 40, y, {align:'center'});
+      doc.text('Marck Business © 2025', 40, y, {align:'center'});
       y += 8;
 
       const fileName = `Lista_${branch}_${now2.getFullYear()}-${now2.getMonth()+1}-${now2.getDate()}.pdf`;
