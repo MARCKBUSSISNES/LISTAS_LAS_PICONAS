@@ -228,8 +228,8 @@ tbody tr:hover{ background: rgba(37,211,102,0.05); }
 /* Floating delete-all button (bottom-left) */
 .floating-delete{
   position:fixed;
-  left:18px;
-  bottom:18px;
+  left:22px;
+  bottom:22px;
   z-index:9999;
   display:flex;
   flex-direction:column;
@@ -305,7 +305,7 @@ tbody tr:hover{ background: rgba(37,211,102,0.05); }
       <option value="PRC">PRC</option>
     </select>
     <button id="addBtn">Agregar</button>
-    <button id="cleanBtn">CLEAR</button>
+    <button id="cleanBtn">DEL</button>
   </div>
 
   <table id="itemsTable" aria-live="polite">
@@ -516,7 +516,7 @@ function loadList(index){
 function saveTodayListForBranch(branch, operator){
   const now = new Date();
   const today = now.toLocaleDateString();
-  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "(   )");
   const existingIndex = saved.findIndex(l => l.fecha === today && l.sucursal === branch);
   const newList = { fecha: today, sucursal: branch, operador: operator, items: JSON.parse(JSON.stringify(items)) };
   if(existingIndex >= 0){
