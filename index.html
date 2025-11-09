@@ -38,7 +38,7 @@ header h1{
   top:5px;
   right:10px;
   font-family: 'digital-7', monospace;
-  font-size:1rem;
+  font-size:1.6rem; /* HORA MÁS GRANDE */
 }
 .container{
   max-width:900px;
@@ -87,6 +87,16 @@ table{
 table, th, td{border:1px solid #444;}
 th, td{padding:6px; text-align:center; font-size:1.1rem;}
 label{font-size:0.9rem;}
+#savedLists button{
+  background:#000;
+  color:#25D366;
+  margin:5px;
+  border:1px solid #25D366;
+}
+#savedLists button:hover{
+  background:#25D366;
+  color:#000;
+}
 </style>
 </head>
 <body>
@@ -140,6 +150,10 @@ label{font-size:0.9rem;}
     <button id="generatePDF">Generar PDF</button>
     <button id="sendJuanBtn">Enviar a Juan Luis</button>
   </div>
+
+  <div id="savedLists">
+    <h3>Listas Guardadas</h3>
+  </div>
 </div>
 
 <audio id="addSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
@@ -149,6 +163,7 @@ const items = [];
 const tbody = document.querySelector('#itemsTable tbody');
 const currentDateEl = document.getElementById('currentDate');
 const addSound = document.getElementById('addSound');
+const savedListsContainer = document.getElementById('savedLists');
 
 function updateDate(){
   const now = new Date();
@@ -202,6 +217,33 @@ document.getElementById('cleanBtn').addEventListener('click', ()=>{
   }
 });
 
+function loadSavedLists(){
+  savedListsContainer.innerHTML = "<h3>Listas Guardadas</h3>";
+  const saved = JSON.parse(localStorage.getItem("trasladosGuardados") || "[]");
+  saved.forEach((list, index)=>{
+    const btn = document.createElement("button");
+    btn.textContent = `${list.fecha} - ${list.sucursal}`;
+    btn.onclick = ()=>loadList(index);
+    savedListsContainer.appendChild(btn);
+  });
+}
+
+function loadList(index){
+  const saved = JSON.parse(localStorage.getItem("trasladosGuardados") || "[]");
+  const selected = saved[index];
+  const today = new Date().toLocaleDateString();
+  if(selected.fecha !== today){
+    alert("No se puede modificar una lista de un día anterior.");
+    return;
+  }
+  items.length = 0;
+  selected.items.forEach(it=>items.push(it));
+  renderTable();
+  document.getElementById("branch").value = selected.sucursal;
+  document.getElementById("operator").value = selected.operador;
+  alert("Lista cargada correctamente. Puedes seguir agregando productos.");
+}
+
 document.getElementById('generatePDF').addEventListener('click', ()=>{
   if(items.length===0){ alert('No hay productos'); return; }
   const operator = document.getElementById('operator').value.trim();
@@ -209,17 +251,30 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
   if(!branch){ alert('Seleccione sucursal'); return; }
   if(!operator){ alert('Ingrese quién realiza el procedimiento'); return; }
 
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({unit:'mm', format:[80, 3000]}); // 80mm ancho
+  // Guardar localmente antes de generar PDF
+  const now = new Date();
+  const today = now.toLocaleDateString();
+  const saved = JSON.parse(localStorage.getItem("trasladosGuardados") || "[]");
+  const existingIndex = saved.findIndex(l => l.fecha === today && l.sucursal === branch);
+  const newList = {fecha: today, sucursal: branch, operador: operator, items: [...items]};
+  if(existingIndex >= 0){
+    saved[existingIndex] = newList;
+  } else {
+    saved.push(newList);
+  }
+  localStorage.setItem("trasladosGuardados", JSON.stringify(saved));
+  loadSavedLists();
 
-  let y=10;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:[80, 3000]});
+
   const logoImg = new Image();
   logoImg.src='LOGO1 (2).png';
   logoImg.onload = ()=>{
+    let y=10;
     doc.addImage(logoImg,'PNG',10,y,60,35);
     y+=38;
 
-    const now = new Date();
     doc.setFontSize(10);
     doc.text(`Sucursal: ${branch}`, 40, y, {align:'center'});
     doc.text(`Fecha: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`,70,10,{align:'right'});
@@ -238,15 +293,12 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
     });
 
     y = doc.lastAutoTable.finalY + 10;
-
-    // Observaciones con líneas más largas
     doc.text('Observaciones:',40,y,{align:'center'}); y+=6;
     for(let i=0;i<3;i++){
       doc.text('______________________________',40,y,{align:'center'});
       y+=8;
     }
 
-    // Firmas con líneas largas
     doc.text('Firma de quien recibe:',40,y,{align:'center'}); y+=6;
     doc.text('______________________________',40,y,{align:'center'}); y+=8;
     doc.text('Nombre de quien recibe:',40,y,{align:'center'}); y+=6;
@@ -254,34 +306,39 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
     doc.text('Firma de quien entrega:',40,y,{align:'center'}); y+=6;
     doc.text('______________________________',40,y,{align:'center'}); y+=12;
 
-    // Texto final SI/NO
     doc.text('Se reciben correctamente todos los productos:',40,y,{align:'center'});
     y+=6;
     doc.rect(20,y,6,6); doc.text('SI',28,y+5);
     doc.rect(45,y,6,6); doc.text('NO',53,y+5);
     y+=12;
 
-    // Pie de página MarckBusiness
     doc.setFontSize(8);
     doc.text('MarckBusiness © 2025 — Todos los derechos reservados',40,y,{align:'center'});
 
-    // Guardar PDF con nombre de sucursal y fecha
     const fileName = `Lista_${branch}_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}.pdf`;
     doc.save(fileName);
 
-    // Abrir WhatsApp según sucursal
+    // Limpiar tabla y sucursal después de generar
+    items.length = 0;
+    renderTable();
+    document.getElementById("branch").value = "";
+    alert("PDF generado y datos limpiados correctamente.");
+
     let number='';
     if(branch==='Roosevelt') number='51330598';
     if(branch==='SanCristobal') number='39161962';
     if(branch==='AtlanticPlaza') number='36704724';
     if(number) window.open(`https://wa.me/${number}`,'_blank');
-  }
+  };
 });
 
 document.getElementById('sendJuanBtn').addEventListener('click', ()=>{
   window.open('https://wa.me/58140621','_blank');
 });
+
+loadSavedLists();
 </script>
 </body>
 </html>
+
 
