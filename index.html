@@ -11,30 +11,39 @@
 
 <style>
 /* -------------------------
-   Diseño moderno (solo CSS)
+   Diseño profesional (tonos oscuros + verde neón)
    -------------------------*/
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes pulseGreen {
-  0%,100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(37,211,102,0.25)); }
-  50% { transform: scale(1.06); filter: drop-shadow(0 0 12px rgba(37,211,102,0.35)); }
+  0%,100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(37,211,102,0.18)); }
+  50% { transform: scale(1.06); filter: drop-shadow(0 0 12px rgba(37,211,102,0.30)); }
 }
 @keyframes heartbeat {
   0%,100% { transform: scale(1); }
   50% { transform: scale(1.08); }
 }
 
+:root{
+  --bg:#0b0f14;
+  --panel: rgba(0,0,0,0.62);
+  --accent: #25D366;
+  --accent-2: #1ae15e;
+  --muted: rgba(255,255,255,0.06);
+  --glass: rgba(255,255,255,0.03);
+}
+
 body{
   font-family: 'Poppins', Arial, sans-serif;
-  background: #0b0f14 url('FONDO PARA LISTA.jpg') no-repeat center center fixed;
+  background: var(--bg) url('FONDO PARA LISTA.jpg') no-repeat center center fixed;
   background-size: cover;
   margin:0;
   color: #e8f5e9;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
-  animation: fadeIn .6s ease;
+  animation: fadeIn .5s ease;
 }
 
 /* Header */
@@ -43,12 +52,12 @@ header{
   align-items:center;
   justify-content:space-between;
   padding:18px 24px;
-  background: rgba(0,0,0,0.75);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.78);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.65);
   position: relative;
 }
 #logo{
-  width:420px;
+  width:380px;
   height:auto;
   object-fit:contain;
 }
@@ -57,54 +66,45 @@ header h1{
   text-align:center;
   margin:0;
   font-size:1.9rem;
-  color:#25D366;
+  color:var(--accent);
   text-shadow: 0 0 8px rgba(37,211,102,0.12);
 }
 #currentDate{
   position:absolute;
-  right:18px;
+  right:120px;
   top:12px;
   font-family:'Courier New', monospace;
-  font-size:1.5rem; /* hora más grande */
-  color:#25D366;
+  font-size:1.5rem; /* hora grande */
+  color:var(--accent);
   font-weight:700;
-  animation: pulseGreen 2.4s infinite;
+  animation: pulseGreen 2.6s infinite;
 }
 
-/* Circular countdown under the date */
+/* Circular countdown under the date (positioned under currentDate) */
 .countdown-wrap{
   position:absolute;
-  right:12px;
-  top:58px;
-  width:64px;
-  height:64px;
+  right:18px;
+  top:12px;
+  width:72px;
+  height:72px;
   display:flex;
   align-items:center;
   justify-content:center;
+  pointer-events:none;
 }
-.countdown-circle{
-  width:64px;
-  height:64px;
-  border-radius:50%;
-  background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  border:2px solid rgba(37,211,102,0.15);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#25D366;
-  font-weight:700;
-  font-family:'Courier New', monospace;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.6);
+.countdown-svg{
+  width:72px;
+  height:72px;
 }
 
-/* Container */
+/* Container (más ancho) */
 .container{
-  max-width:970px;
-  margin:22px auto;
-  padding:20px;
-  background: rgba(0,0,0,0.58);
+  max-width:1120px; /* más ancho */
+  margin:26px auto;
+  padding:24px;
+  background: var(--panel);
   border-radius:12px;
-  box-shadow:0 10px 40px rgba(0,0,0,0.7);
+  box-shadow:0 10px 40px rgba(0,0,0,0.72);
   animation: fadeIn .6s ease;
 }
 
@@ -123,13 +123,13 @@ select, input{
   border:none;
   font-size:1rem;
   flex:1;
-  background: rgba(255,255,255,0.04);
+  background: var(--glass);
   color: #fff;
-  transition: box-shadow .2s ease, transform .06s ease;
+  transition: box-shadow .18s ease, transform .06s ease;
 }
 select:focus, input:focus {
   outline: none;
-  box-shadow: 0 6px 18px rgba(37,211,102,0.12);
+  box-shadow: 0 10px 28px rgba(37,211,102,0.10);
 }
 
 /* Buttons */
@@ -142,40 +142,40 @@ button{
   font-size:1rem;
   transition: transform .12s ease, box-shadow .12s ease;
 }
-#addBtn{ background:#25D366; color:#001; }
+#addBtn{ background:var(--accent); color:#001; }
 #addBtn:hover{ transform: translateY(-3px); box-shadow:0 8px 22px rgba(37,211,102,0.18); }
 #cleanBtn{
   width:44px; height:44px; border-radius:50%;
-  border:2px solid #25D366; background:transparent; color:#25D366;
+  border:2px solid var(--accent); background:transparent; color:var(--accent);
 }
-#cleanBtn:hover{ background:#25D366; color:#000; transform: rotate(8deg); box-shadow:0 8px 22px rgba(37,211,102,0.12); }
-#generatePDF{ background:#25D366; color:#001; }
+#cleanBtn:hover{ background:var(--accent); color:#000; transform: rotate(8deg); box-shadow:0 8px 22px rgba(37,211,102,0.12); }
+#generatePDF{ background:var(--accent); color:#001; }
 #generatePDF:hover{ transform: translateY(-3px); box-shadow:0 8px 22px rgba(37,211,102,0.18); }
-#sendJuanBtn{ background:transparent; color:#25D366; border:2px solid #25D366; }
-#sendJuanBtn:hover{ background:#25D366; color:#000; transform: translateY(-3px); }
+#sendJuanBtn{ background:transparent; color:var(--accent); border:2px solid var(--accent); }
+#sendJuanBtn:hover{ background:var(--accent); color:#000; transform: translateY(-3px); }
 
 /* Table */
 table{
   width:100%;
   border-collapse:collapse;
   margin-top:12px;
-  background: rgba(255,255,255,0.02);
+  background: rgba(255,255,255,0.01);
   border-radius:10px;
   overflow:hidden;
 }
 table, th, td{ border-bottom:1px solid rgba(255,255,255,0.04); }
 th{
   background: rgba(37,211,102,0.06);
-  color:#25D366;
+  color:var(--accent);
   font-weight:800;
-  padding:10px;
+  padding:12px;
 }
 td{
   padding:10px;
   text-align:center;
   color:#e6f4ea;
 }
-tbody tr:hover{ background: rgba(37,211,102,0.06); }
+tbody tr:hover{ background: rgba(37,211,102,0.05); }
 
 /* Delete button inside table */
 .table-delete-btn{
@@ -196,7 +196,7 @@ tbody tr:hover{ background: rgba(37,211,102,0.06); }
 }
 #savedLists h3{ width:100%; margin:0 0 6px 0; color:#cde9d1; }
 
-/* Floating LOGOMARCK support button (bottom-right) */
+/* Floating LOGOMARCK support button (bottom-right) - sin fondo */
 .floating-support{
   position:fixed;
   right:18px;
@@ -206,29 +206,60 @@ tbody tr:hover{ background: rgba(37,211,102,0.06); }
   flex-direction:column;
   align-items:center;
   gap:6px;
+  pointer-events:none; /* no action */
 }
 .support-btn{
   width:64px;
   height:64px;
   border-radius:50%;
-  background: #fff;
+  background:transparent; /* sin fondo */
   display:flex;
   align-items:center;
   justify-content:center;
   box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-  cursor:default; /* no action on click as requested */
+  cursor:default;
   animation: heartbeat 2s infinite;
-  border: 3px solid rgba(0,0,0,0.05);
+  border: 2px solid rgba(255,255,255,0.03);
+  pointer-events: auto; /* allow hover but keep no click action if desired */
 }
-.support-btn img{ width:42px; height:42px; object-fit:contain; display:block; animation: pulseGreen 2.2s infinite; }
-.support-label{ font-size:0.85rem; color:#cfeed8; text-shadow:0 2px 6px rgba(0,0,0,0.6); }
+.support-btn img{ width:44px; height:44px; object-fit:contain; display:block; animation: pulseGreen 2.2s infinite; }
+.support-label{ font-size:0.85rem; color:#cfeed8; text-shadow:0 2px 6px rgba(0,0,0,0.6); pointer-events:none; }
+
+/* Floating delete-all button (bottom-left) */
+.floating-delete{
+  position:fixed;
+  left:18px;
+  bottom:18px;
+  z-index:9999;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+}
+.delete-btn{
+  width:64px;
+  height:64px;
+  border-radius:50%;
+  background: transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:2px solid rgba(255,255,255,0.06);
+  color:var(--accent);
+  font-weight:700;
+  cursor:pointer;
+  transition: transform .14s ease, box-shadow .14s ease;
+}
+.delete-btn:hover{ transform: scale(1.05); box-shadow: 0 10px 26px rgba(37,211,102,0.08); }
+.delete-label{ font-size:0.85rem; color:#f7c6c6; pointer-events:none; }
 
 /* Small responsiveness */
-@media (max-width:720px){
+@media (max-width:920px){
   header h1{ font-size:1.3rem; }
   #logo{ width:260px; }
-  #currentDate{ font-size:1.05rem; right:12px; top:8px; }
-  .countdown-wrap{ top:44px; right:8px; }
+  #currentDate{ font-size:1.05rem; right:100px; top:8px; }
+  .countdown-wrap{ top:60px; right:12px; }
+  .container{ margin:12px; padding:12px; }
 }
 </style>
 </head>
@@ -242,9 +273,20 @@ tbody tr:hover{ background: rgba(37,211,102,0.06); }
   <!-- Hora grande -->
   <div id="currentDate"></div>
 
-  <!-- Reloj circular (cuenta regresiva por minuto) -->
+  <!-- Reloj circular (cuenta regresiva por minuto) - SVG -->
   <div class="countdown-wrap" aria-hidden="true">
-    <div class="countdown-circle" id="countdownDisplay">60</div>
+    <svg class="countdown-svg" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.04)" stroke-width="8" fill="none"></circle>
+      <circle id="progressCircle" cx="50" cy="50" r="44" stroke="url(#grad)" stroke-width="8" fill="none"
+              stroke-linecap="round" transform="rotate(-90 50 50)"></circle>
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#25D366"/>
+          <stop offset="100%" stop-color="#1ae15e"/>
+        </linearGradient>
+      </defs>
+      <text id="countdownText" x="50" y="55" text-anchor="middle" font-family="Courier New" font-size="18" fill="#25D366">60</text>
+    </svg>
   </div>
 </header>
 
@@ -299,12 +341,18 @@ tbody tr:hover{ background: rgba(37,211,102,0.06); }
   </div>
 </div>
 
-<!-- Floating support button (LOGOMARCK) - no acción al click -->
+<!-- Floating support button (LOGOMARCK) - no action on click -->
 <div class="floating-support" aria-hidden="true">
   <div class="support-btn" title="Soporte">
     <img src="LOGOMARCK.png" alt="LOGOMARCK">
   </div>
   <div class="support-label">Soporte</div>
+</div>
+
+<!-- Floating delete-all button bottom-left -->
+<div class="floating-delete" aria-hidden="true">
+  <button class="delete-btn" id="deleteAllBtn" title="Borrar todo">🗑</button>
+  <div class="delete-label">Borrar todo</div>
 </div>
 
 <audio id="addSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
@@ -320,36 +368,49 @@ const tbody = document.querySelector('#itemsTable tbody');
 const currentDateEl = document.getElementById('currentDate');
 const addSound = document.getElementById('addSound');
 const savedListsContainer = document.getElementById('savedLists');
-const countdownDisplay = document.getElementById('countdownDisplay');
+const countdownText = document.getElementById('countdownText');
+const progressCircle = document.getElementById('progressCircle');
+
+const STORAGE_KEY = "trasladosGuardados";
 
 /* ----- Fecha/hora y contador ----- */
 function updateDate(){
   const now = new Date();
-  // Mantener el mismo formato usado antes (locale)
   currentDateEl.textContent = now.toLocaleString();
 }
 updateDate();
 setInterval(updateDate, 1000);
 
-/* Countdown por minuto (se reinicia cada minuto) */
+/* Countdown circular (progress) - 60 seconds */
+const CIRCLE_RADIUS = 44;
+const CIRCLE_CIRC = 2 * Math.PI * CIRCLE_RADIUS; // circumference
+progressCircle.style.strokeDasharray = `${CIRCLE_CIRC}`;
+progressCircle.style.strokeDashoffset = `0`;
+
 let countdownSec = 60;
-function startCountdown(){
-  // calcular segundos restantes en el minuto actual
+function syncAndStartCountdown(){
   const now = new Date();
   countdownSec = 60 - now.getSeconds();
-  countdownDisplay.textContent = countdownSec;
+  if(countdownSec === 0) countdownSec = 60;
+  updateCountdownUI(countdownSec);
   clearInterval(window._countdownInterval);
   window._countdownInterval = setInterval(()=>{
     countdownSec--;
     if(countdownSec <= 0){
-      // reinicia a 60 y espera siguiente minuto
       countdownSec = 60;
     }
-    countdownDisplay.textContent = countdownSec;
+    updateCountdownUI(countdownSec);
   }, 1000);
 }
-startCountdown();
-setInterval(startCountdown, 1000 * 30); // re-sincroniza cada 30s por seguridad
+function updateCountdownUI(sec){
+  countdownText.textContent = sec;
+  // progress: 60 -> 0  (we want the stroke to reduce from full to 0)
+  const progress = sec / 60; // 1 -> 0
+  const dash = CIRCLE_CIRC * (1 - progress); // consumed part
+  progressCircle.style.strokeDashoffset = `${dash}`;
+}
+syncAndStartCountdown();
+setInterval(syncAndStartCountdown, 30000); // re-sync every 30s
 
 /* ----- Render tabla (igual que antes) ----- */
 function renderTable(){
@@ -370,6 +431,7 @@ function renderTable(){
 function deleteItem(index){
   items.splice(index,1);
   renderTable();
+  autosaveToday(); // update saved copy
 }
 
 /* Hacer funciones globales (mantener compatibilidad con onclick inline) */
@@ -404,7 +466,6 @@ document.getElementById('cleanBtn').addEventListener('click', ()=>{
   if(confirm("¿Desea limpiar toda la lista?")){
     items.length=0;
     renderTable();
-    // actualizar guardado
     autosaveToday();
   }
 });
@@ -413,22 +474,18 @@ document.getElementById('cleanBtn').addEventListener('click', ()=>{
    Guardado local (localStorage)
    - Guardar por día y sucursal
    - Solo permitir cargar/modificar si es del mismo día
-   ========================= */
-
-const STORAGE_KEY = "trasladosGuardados";
+   =========================*/
 
 /* Cargar las listas guardadas en la UI */
 function loadSavedLists(){
-  // preserva el título y luego agrega botones
   savedListsContainer.innerHTML = "<h3>Listas Guardadas</h3>";
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-  // ordenar por fecha más reciente al final
   saved.forEach((list, index)=>{
     const btn = document.createElement("button");
     btn.textContent = `${list.fecha} - ${list.sucursal}`;
     btn.style.background = 'transparent';
-    btn.style.color = '#25D366';
-    btn.style.border = '1px solid rgba(37,211,102,0.25)';
+    btn.style.color = 'var(--accent)';
+    btn.style.border = '1px solid rgba(37,211,102,0.18)';
     btn.style.padding = '8px 12px';
     btn.style.borderRadius = '8px';
     btn.style.cursor = 'pointer';
@@ -484,7 +541,7 @@ function autosaveToday(){
 loadSavedLists();
 
 /* ---------------------------
-   Generar PDF (mejor manejo logo)
+   Generar PDF (mejor manejo logo y firma)
    --------------------------- */
 document.getElementById('generatePDF').addEventListener('click', ()=>{
   if(items.length===0){ alert('No hay productos'); return; }
@@ -495,8 +552,6 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
 
   // Guardar localmente antes de generar PDF
   const now = new Date();
-  const today = now.toLocaleDateString();
-  // Guard in localStorage (overwrite same day & branch)
   saveTodayListForBranch(branch, operator);
 
   const { jsPDF } = window.jspdf;
@@ -506,20 +561,16 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
   const logoImg = new Image();
   logoImg.src = 'LOGO1 (2).png';
 
-  // Wait for first logo to load (the header logo) before continuing PDF creation
   logoImg.onload = () => {
     try {
-      // Add header logo (kept as in original behavior)
-      // compute size maintaining aspect ratio so it's not "aplastado"
       const maxWidth = 60; // mm
-      const imgRatio = logoImg.naturalWidth / logoImg.naturalHeight;
-      const imgW = maxWidth;
-      const imgH = maxWidth / imgRatio;
+      const imgRatio = logoImg.naturalWidth / logoImg.naturalHeight || 1;
+      const imgW = Math.min(maxWidth, logoImg.naturalWidth * 0.1);
+      // compute height by ratio
+      const imgH = imgW / imgRatio;
       doc.addImage(logoImg, 'PNG', 10, y, imgW, imgH);
       y += imgH + 2;
-
     } catch(err){
-      // if addImage fails, continue without header logo
       y += 10;
     }
 
@@ -543,14 +594,12 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
 
     y = doc.lastAutoTable.finalY + 10;
 
-    // Observaciones
     doc.text('Observaciones:',40,y,{align:'center'}); y+=6;
     for(let i=0;i<3;i++){
       doc.text('______________________________',40,y,{align:'center'});
       y+=8;
     }
 
-    // Firmas
     doc.text('Firma de quien recibe:',40,y,{align:'center'}); y+=6;
     doc.text('______________________________',40,y,{align:'center'}); y+=8;
     doc.text('Nombre de quien recibe:',40,y,{align:'center'}); y+=6;
@@ -558,24 +607,21 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
     doc.text('Firma de quien entrega:',40,y,{align:'center'}); y+=6;
     doc.text('______________________________',40,y,{align:'center'}); y+=12;
 
-    // Si/No boxes
     doc.text('Se reciben correctamente todos los productos:',40,y,{align:'center'});
     y+=6;
     doc.rect(20,y,6,6); doc.text('SI',28,y+5);
     doc.rect(45,y,6,6); doc.text('NO',53,y+5);
     y+=12;
 
-    // Now add LOGOMARCK small and signature (ensure logo keeps aspect ratio and is small)
+    // LOGOMARCK small and signature (ensure aspect ratio)
     const logo2 = new Image();
     logo2.src = 'LOGOMARCK.png';
     logo2.onload = () => {
       try {
-        // small width in mm for 80mm page
         const maxW = 30; // mm
-        const ratio = logo2.naturalWidth / logo2.naturalHeight;
+        const ratio = (logo2.naturalWidth && logo2.naturalHeight) ? (logo2.naturalWidth / logo2.naturalHeight) : 1;
         const w = maxW;
-        const h = maxW / ratio;
-        // center horizontally on page width ~80mm -> center x = (80/2 - w/2)
+        const h = w / ratio;
         const x = (80 - w) / 2;
         doc.addImage(logo2, 'PNG', x, y, w, h);
         y += h + 6;
@@ -583,40 +629,32 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
         y += 4;
       }
 
-      // Firma de texto (solo "Sistema Marck Business © 2025")
+      // Firma (solo "Sistema Marck Business © 2025")
       doc.setFontSize(9);
       doc.text('Sistema Marck Business © 2025', 40, y, {align:'center'});
       y += 8;
 
-      // Footer small credit (kept minimal)
-      doc.setFontSize(8);
-      // (we previously removed "Todos los derechos reservados")
-
-      // Guardar PDF
       const fileName = `Lista_${branch}_${now2.getFullYear()}-${now2.getMonth()+1}-${now2.getDate()}.pdf`;
       doc.save(fileName);
 
-      // Limpiar tabla y sucursal (tal como pediste anteriormente)
+      // Limpiar tabla y sucursal (tal como pediste)
       items.length = 0;
       renderTable();
       document.getElementById('branch').value = '';
 
-      // Abrir WhatsApp según sucursal (igual que antes)
+      // Abrir WhatsApp según sucursal (igual)
       let number='';
       if(branch==='Roosevelt') number='51330598';
       if(branch==='SanCristobal') number='39161962';
       if(branch==='AtlanticPlaza') number='36704724';
       if(number) window.open(`https://wa.me/${number}`,'_blank');
-
     }; // logo2.onload
   }; // logoImg.onload
 
-  // In case logoImg never loads (network/file issue), set a fallback timeout to still finish PDF after 1.2s
+  // fallback timeout if images fail to load
   setTimeout(() => {
-    // If PDF already saved by onload, skip; otherwise attempt to finalize with minimal content
-    // We check whether items array was already cleared to avoid double-saving
     if(items.length === 0) return;
-    // Create a minimal version if logo load stalled: proceed similarly but without images
+    // Similar minimal fallback (without images)
     const now3 = new Date();
     const doc2 = new jsPDF({unit:'mm', format:[80, 3000]});
     let y2 = 10;
@@ -642,7 +680,6 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
     const fileName2 = `Lista_${document.getElementById('branch').value}_${now3.getFullYear()}-${now3.getMonth()+1}-${now3.getDate()}.pdf`;
     doc2.save(fileName2);
 
-    // cleanup
     items.length = 0;
     renderTable();
     document.getElementById('branch').value = '';
@@ -654,7 +691,7 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
     if(branchNow==='AtlanticPlaza') number='36704724';
     if(number) window.open(`https://wa.me/${number}`,'_blank');
 
-  }, 1400);
+  }, 1600);
 });
 
 /* ----- Enviar a Juan Luis (igual) ----- */
@@ -662,10 +699,22 @@ document.getElementById('sendJuanBtn').addEventListener('click', ()=>{
   window.open('https://wa.me/58140621','_blank');
 });
 
-/* ----- Cargar saved lists al iniciar ----- */
-loadSavedLists();
+/* ----- BOTÓN BORRAR TODO (flotante izquierdo) ----- */
+document.getElementById('deleteAllBtn').addEventListener('click', ()=>{
+  const key = prompt("POR FAVOR INGRESE LA CLAVE DE JUAN LUIS");
+  if(key === null) return; // cancel pressed
+  if(key.trim() === "22782522"){
+    // delete all saved lists from localStorage
+    localStorage.removeItem(STORAGE_KEY);
+    loadSavedLists();
+    alert("Todas las listas guardadas han sido borradas.");
+  } else {
+    alert("Clave incorrecta.");
+  }
+});
 
-/* ----- Hacer LOGOMARCK pulse (CSS already does) - no JS needed ----- */
+/* Cargar saved lists al iniciar */
+loadSavedLists();
 
 </script>
 </body>
