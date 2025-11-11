@@ -5,49 +5,303 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TORTILLAS DE HARIN LAS PICONAS</title>
 
-<!-- Intento de carga local: si faltan, el script más abajo cargará CDN automáticamente -->
-<script>
-  // Colocamos tags para intentar cargar las librerías locales primero.
-  (function(){
-    var a = document.createElement('script');
-    a.src = 'libs/jspdf.umd.min.js';
-    a.async = false;
-    document.head.appendChild(a);
-    var b = document.createElement('script');
-    b.src = 'libs/jspdf.plugin.autotable.min.js';
-    b.async = false;
-    document.head.appendChild(b);
-  })();
-</script>
+<!-- jsPDF desde CDN (confiable) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <style>
-/* Estilos (versión comprimida para claridad) */
-:root{--accent:#25D366}
-body{font-family:Arial,Helvetica,sans-serif;background:#0b0f14;color:#e8f5e9;margin:0}
-.container{max-width:1120px;margin:24px auto;padding:18px;background:rgba(0,0,0,0.62);border-radius:8px}
-.form-group{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-input,select,button{padding:10px;border-radius:6px;border:none}
-#itemsTable{width:100%;margin-top:12px;border-collapse:collapse}
-#itemsTable th{background:rgba(37,211,102,0.06);padding:8px;color:var(--accent)}
-#itemsTable td{padding:8px;text-align:center}
-.table-delete-btn{background:#ff5c5c;color:#fff;border:none;border-radius:6px;padding:6px 8px;cursor:pointer}
-h1{color:var(--accent);text-align:center}
-.small-muted{font-size:0.85rem;color:#cfead2}
+/* -------------------------
+   Diseño profesional (tonos oscuros + verde neón)
+   -------------------------*/
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulseGreen {
+  0%,100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(37,211,102,0.18)); }
+  50% { transform: scale(1.06); filter: drop-shadow(0 0 12px rgba(37,211,102,0.30)); }
+}
+@keyframes heartbeat {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+:root{
+  --bg:#0b0f14;
+  --panel: rgba(0,0,0,0.62);
+  --accent: #25D366;
+  --accent-2: #1ae15e;
+  --muted: rgba(255,255,255,0.06);
+  --glass: rgba(255,255,255,0.03);
+}
+
+body{
+  font-family: 'Poppins', Arial, sans-serif;
+  background: var(--bg) url('FONDO PARA LISTA.jpg') no-repeat center center fixed;
+  background-size: cover;
+  margin:0;
+  color: #e8f5e9;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  animation: fadeIn .5s ease;
+}
+
+/* Header */
+header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:18px 24px;
+  background: rgba(0,0,0,0.78);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.65);
+  position: relative;
+}
+#logo{
+  width:380px;
+  height:auto;
+  object-fit:contain;
+}
+header h1{
+  flex:1;
+  text-align:center;
+  margin:0;
+  font-size:1.9rem;
+  color:var(--accent);
+  text-shadow: 0 0 8px rgba(37,211,102,0.12);
+}
+#currentDate{
+  position:absolute;
+  right:120px;
+  top:12px;
+  font-family:'Courier New', monospace;
+  font-size:1.5rem; /* hora grande */
+  color:var(--accent);
+  font-weight:700;
+  animation: pulseGreen 2.6s infinite;
+}
+
+/* Circular countdown under the date (positioned under currentDate) */
+.countdown-wrap{
+  position:absolute;
+  right:18px;
+  top:12px;
+  width:72px;
+  height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+.countdown-svg{
+  width:72px;
+  height:72px;
+}
+
+/* Container (más ancho) */
+.container{
+  max-width:1120px; /* más ancho */
+  margin:26px auto;
+  padding:24px;
+  background: var(--panel);
+  border-radius:12px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.72);
+  animation: fadeIn .6s ease;
+}
+
+/* Form group */
+.form-group{
+  display:flex;
+  gap:12px;
+  margin-bottom:14px;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center;
+}
+select, input{
+  padding:12px;
+  border-radius:8px;
+  border:none;
+  font-size:1rem;
+  flex:1;
+  background: var(--glass);
+  color: #fff;
+  transition: box-shadow .18s ease, transform .06s ease;
+}
+select:focus, input:focus {
+  outline: none;
+  box-shadow: 0 10px 28px rgba(37,211,102,0.10);
+}
+
+/* Buttons */
+button{
+  padding:12px 18px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:700;
+  font-size:1rem;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+#addBtn{ background:var(--accent); color:#001; }
+#addBtn:hover{ transform: translateY(-3px); box-shadow:0 8px 22px rgba(37,211,102,0.18); }
+#cleanBtn{
+  width:44px; height:44px; border-radius:50%;
+  border:2px solid var(--accent); background:transparent; color:var(--accent);
+}
+#cleanBtn:hover{ background:var(--accent); color:#000; transform: rotate(8deg); box-shadow:0 8px 22px rgba(37,211,102,0.12); }
+#generatePDF{ background:var(--accent); color:#001; }
+#generatePDF:hover{ transform: translateY(-3px); box-shadow:0 8px 22px rgba(37,211,102,0.18); }
+#sendJuanBtn{ background:transparent; color:var(--accent); border:2px solid var(--accent); }
+#sendJuanBtn:hover{ background:var(--accent); color:#000; transform: translateY(-3px); }
+
+/* Table */
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:12px;
+  background: rgba(255,255,255,0.01);
+  border-radius:10px;
+  overflow:hidden;
+}
+table, th, td{ border-bottom:1px solid rgba(255,255,255,0.04); }
+th{
+  background: rgba(37,211,102,0.06);
+  color:var(--accent);
+  font-weight:800;
+  padding:12px;
+}
+td{
+  padding:10px;
+  text-align:center;
+  color:#e6f4ea;
+}
+tbody tr:hover{ background: rgba(37,211,102,0.05); }
+
+.table-delete-btn{
+  background:#ff5c5c;
+  color:white;
+  border:none;
+  border-radius:6px;
+  padding:6px 8px;
+  cursor:pointer;
+}
+
+/* Saved lists area */
+#savedLists{
+  margin-top:18px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+#savedLists h3{ width:100%; margin:0 0 6px 0; color:#cde9d1; }
+
+/* Floating LOGOMARCK support button (bottom-right) - sin fondo */
+.floating-support{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:9999;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  pointer-events:none; /* no action */
+}
+.support-btn{
+  width:64px;
+  height:64px;
+  border-radius:50%;
+  background:transparent; /* sin fondo */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+  cursor:default;
+  animation: heartbeat 2s infinite;
+  border: 2px solid rgba(255,255,255,0.03);
+  pointer-events: auto; /* allow hover but keep no click action if desired */
+}
+.support-btn img{ width:44px; height:44px; object-fit:contain; display:block; animation: pulseGreen 2.2s infinite; }
+.support-label{ font-size:0.85rem; color:#cfeed8; text-shadow:0 2px 6px rgba(0,0,0,0.6); pointer-events:none; }
+
+/* Floating delete-all button (bottom-left) */
+.floating-delete{
+  position:fixed;
+  left:22px;
+  bottom:22px;
+  z-index:9999;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+}
+.delete-btn{
+  width:64px;
+  height:64px;
+  border-radius:50%;
+  background: transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:2px solid rgba(255,255,255,0.06);
+  color:var(--accent);
+  font-weight:700;
+  cursor:pointer;
+  transition: transform .14s ease, box-shadow .14s ease;
+}
+.delete-btn:hover{ transform: scale(1.05); box-shadow: 0 10px 26px rgba(37,211,102,0.08); }
+.delete-label{ font-size:0.85rem; color:#f7c6c6; pointer-events:none; }
+
+/* Small responsiveness */
+@media (max-width:920px){
+  header h1{ font-size:1.3rem; }
+  #logo{ width:260px; }
+  #currentDate{ font-size:1.05rem; right:100px; top:8px; }
+  .countdown-wrap{ top:60px; right:12px; }
+  .container{ margin:12px; padding:12px; }
+}
 </style>
 </head>
+
 <body>
-<div class="container">
+
+<header>
+  <img src="LOGO1 (2).png" alt="Logo" id="logo">
   <h1>REGISTRO DE PRODUCTOS PARA TRASLADO</h1>
 
+  <!-- Hora grande -->
+  <div id="currentDate"></div>
+
+  <!-- Reloj circular (cuenta regresiva por minuto) - SVG -->
+  <div class="countdown-wrap" aria-hidden="true">
+    <svg class="countdown-svg" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.04)" stroke-width="8" fill="none"></circle>
+      <circle id="progressCircle" cx="50" cy="50" r="44" stroke="url(#grad)" stroke-width="8" fill="none"
+              stroke-linecap="round" transform="rotate(-90 50 50)"></circle>
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#25D366"/>
+          <stop offset="100%" stop-color="#1ae15e"/>
+        </linearGradient>
+      </defs>
+      <text id="countdownText" x="50" y="55" text-anchor="middle" font-family="Courier New" font-size="18" fill="#25D366">60</text>
+    </svg>
+  </div>
+</header>
+
+<div class="container">
   <div class="form-group">
     <input type="text" id="productName" placeholder="Nombre del producto">
-    <input type="number" id="productQty" placeholder="Cantidad" style="width:110px">
-    <input type="text" id="productUnit" placeholder="Unidad" style="width:120px">
-    <select id="productSupplier" style="width:140px">
+    <input type="number" id="productQty" placeholder="Cantidad">
+    <input type="text" id="productUnit" placeholder="Unidad de medida">
+    <select id="productSupplier">
       <option value="">Proveedor</option>
       <option value="PP">PP</option>
       <option value="AP">AP</option>
       <option value="SC">SC</option>
+      <option value="RS">RS</option>
+      <option value="TERM">TERM</option>
+      <option value="PRC">PRC</option>
     </select>
     <button id="addBtn">Agregar</button>
     <button id="cleanBtn">DEL</button>
@@ -56,14 +310,19 @@ h1{color:var(--accent);text-align:center}
   <table id="itemsTable" aria-live="polite">
     <thead>
       <tr>
-        <th>PRODUCTO</th><th>CANTIDAD</th><th>UNIDAD</th><th>PROVEEDOR</th><th>RECIBIDO</th><th>BORRAR</th>
+        <th>PRODUCTO</th>
+        <th>CANTIDAD</th>
+        <th>UNIDAD</th>
+        <th>PROVEEDOR</th>
+        <th>RECIBIDO</th>
+        <th>BORRAR</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 
-  <div class="form-group" style="margin-top:12px">
-    <input type="text" id="operator" placeholder="Quién realiza el procedimiento" style="min-width:200px">
+  <div class="form-group" style="margin-top:18px;">
+    <input type="text" id="operator" placeholder="Quién realiza el procedimiento">
     <select id="branch">
       <option value="">Sucursal</option>
       <option value="Roosevelt">Roosevelt</option>
@@ -74,94 +333,109 @@ h1{color:var(--accent);text-align:center}
     <button id="sendJuanBtn">Enviar</button>
   </div>
 
-  <div id="savedLists" style="margin-top:14px"><h3>Listas Guardadas</h3></div>
-  <div class="small-muted">Nota: si las librerías locales no existen, se cargarán desde CDN automáticamente.</div>
+  <!-- Saved lists (botones por cada guardado del día) -->
+  <div id="savedLists">
+    <h3>Listas Guardadas</h3>
+    <!-- botones generados dinámicamente -->
+  </div>
 </div>
 
-<!-- Sonidos locales (reemplaza con tus MP3 reales en /sounds) -->
+<!-- Floating support button (LOGOMARCK) - no action on click -->
+<div class="floating-support" aria-hidden="true">
+  <div class="support-btn" title="Soporte">
+    <img src="LOGOMARCK.png" alt="LOGOMARCK">
+  </div>
+  <div class="support-label">Soporte</div>
+</div>
+
+<!-- Floating delete-all button bottom-left -->
+<div class="floating-delete" aria-hidden="true">
+  <button class="delete-btn" id="deleteAllBtn" title="Borrar todo">🗑</button>
+  <div class="delete-label">CLEAR ALL</div>
+</div>
+
+<!-- Sonidos: si los tienes local, reemplaza la URL por sounds/CLICK.mp3 y sounds/VOZ.mp3 -->
 <audio id="addSound" src="sounds/CLICK.mp3" preload="auto"></audio>
 <audio id="vozSound" src="sounds/VOZ.mp3" preload="auto"></audio>
 
 <script>
-/*
-  Manejador robusto para asegurar que jsPDF y autotable estén disponibles.
-  - Si las versiones locales no cargaron, cargamos desde CDN (fallback).
-  - Después habilitamos la funcionalidad del botón "Generar PDF".
-*/
-
-const CDN_JS = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
-const CDN_AUTOTABLE = "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js";
-
-function loadScript(url){
-  return new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = url;
-    s.async = true;
-    s.onload = () => resolve(url);
-    s.onerror = () => reject(new Error('Error cargando ' + url));
-    document.head.appendChild(s);
-  });
-}
-
-// Comprueba si jsPDF ya está disponible
-function hasJsPDF(){
-  return !!(window.jspdf && window.jspdf.jsPDF);
-}
-
-// Intentar asegurar librerías: si ya cargaron (local), resuelve; si no, carga CDN.
-async function ensureLibraries(){
-  if(hasJsPDF()) return true;
-  // Intenta cargar CDN (fallback)
-  try{
-    await loadScript(CDN_JS);
-    // plugin autotable may attach itself or require loading:
-    try{ await loadScript(CDN_AUTOTABLE); }catch(e){ /* ignore */ }
-    // give some time for window.jspdf to exist
-    if(!hasJsPDF()){
-      // sometimes jspdf exposes differently; try to wait a tick
-      await new Promise(r=>setTimeout(r, 120));
-    }
-    return hasJsPDF();
-  }catch(err){
-    console.error("No se pudo cargar jsPDF/autotable desde CDN:", err);
-    return false;
-  }
-}
-
-/* ===============================
-   Aplicación: UI, persistencia, PDF
-   =============================== */
+/* ===========================
+   Lógica corregida y robusta
+   =========================== */
 
 const items = [];
 const tbody = document.querySelector('#itemsTable tbody');
+const currentDateEl = document.getElementById('currentDate');
+const addSound = document.getElementById('addSound');
+const savedListsContainer = document.getElementById('savedLists');
+const countdownText = document.getElementById('countdownText');
+const progressCircle = document.getElementById('progressCircle');
+
 const STORAGE_KEY = "trasladosGuardados";
 const CURRENT_STATE_KEY = "traslado_current_state";
 
+/* ----- Fecha/hora y contador ----- */
+function updateDate(){
+  const now = new Date();
+  currentDateEl.textContent = now.toLocaleString();
+}
+updateDate();
+setInterval(updateDate, 1000);
+
+/* Countdown circular (progress) - 60 seconds */
+const CIRCLE_RADIUS = 44;
+const CIRCLE_CIRC = 2 * Math.PI * CIRCLE_RADIUS; // circumference
+try{ progressCircle.style.strokeDasharray = `${CIRCLE_CIRC}`; progressCircle.style.strokeDashoffset = `0`; }catch(e){}
+
+let countdownSec = 60;
+function syncAndStartCountdown(){
+  const now = new Date();
+  countdownSec = 60 - now.getSeconds();
+  if(countdownSec === 0) countdownSec = 60;
+  updateCountdownUI(countdownSec);
+  clearInterval(window._countdownInterval);
+  window._countdownInterval = setInterval(()=>{
+    countdownSec--;
+    if(countdownSec <= 0){
+      countdownSec = 60;
+    }
+    updateCountdownUI(countdownSec);
+  }, 1000);
+}
+function updateCountdownUI(sec){
+  try{ countdownText.textContent = sec; }catch(e){}
+  const progress = sec / 60;
+  const dash = CIRCLE_CIRC * (1 - progress);
+  try{ progressCircle.style.strokeDashoffset = `${dash}`; }catch(e){}
+}
+syncAndStartCountdown();
+setInterval(syncAndStartCountdown, 30000);
+
+/* ----- Render tabla ----- */
 function renderTable(){
-  tbody.innerHTML = '';
-  items.forEach((it, index) => {
+  tbody.innerHTML='';
+  items.forEach((it,index)=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${escapeHtml(it.name)}</td>
-                    <td>${escapeHtml(String(it.qty))}</td>
-                    <td>${escapeHtml(it.unit)}</td>
-                    <td>${escapeHtml(it.supplier)}</td>
+    tr.innerHTML = `<td>${it.name}</td>
+                    <td>${it.qty}</td>
+                    <td>${it.unit}</td>
+                    <td>${it.supplier}</td>
                     <td>[ ]</td>
                     <td><button class="table-delete-btn" onclick="deleteItem(${index})">❌</button></td>`;
     tbody.appendChild(tr);
   });
 }
 
-function escapeHtml(s){
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-window.deleteItem = function(index){
+/* ----- Eliminar item ----- */
+function deleteItem(index){
   items.splice(index,1);
   renderTable();
   autosaveToday();
   saveCurrentState();
-};
+}
+window.deleteItem = deleteItem;
 
+/* ----- Agregar producto ----- */
 document.getElementById('addBtn').addEventListener('click', ()=>{
   const name = document.getElementById('productName').value.trim();
   const qty = document.getElementById('productQty').value;
@@ -170,31 +444,49 @@ document.getElementById('addBtn').addEventListener('click', ()=>{
   if(!name || !qty || !supplier){ alert('Complete todos los campos'); return; }
   items.push({name, qty, unit, supplier});
   renderTable();
-  try{ document.getElementById('addSound').currentTime = 0; document.getElementById('addSound').play(); }catch(e){}
-  document.getElementById('productName').value=''; document.getElementById('productQty').value=''; document.getElementById('productUnit').value='';
+  try{ addSound.currentTime = 0; addSound.play(); }catch(e){}
+  document.getElementById('productName').value='';
+  document.getElementById('productQty').value='';
+  document.getElementById('productUnit').value='';
+  document.getElementById('productName').focus();
+
   autosaveToday();
   saveCurrentState();
 });
 
+/* Enter para agregar */
+document.getElementById('productName').addEventListener('keypress', (e)=>{
+  if(e.key==='Enter'){ document.getElementById('addBtn').click(); }
+});
+
+/* ----- Limpiar lista ----- */
 document.getElementById('cleanBtn').addEventListener('click', ()=>{
   if(confirm("¿Desea limpiar toda la lista?")){
-    items.length = 0;
+    items.length=0;
     renderTable();
     autosaveToday();
     saveCurrentState();
   }
 });
 
+/* =========================
+   Guardado local (localStorage)
+   =========================*/
+
 function loadSavedLists(){
-  const container = document.getElementById('savedLists');
-  container.innerHTML = '<h3>Listas Guardadas</h3>';
+  savedListsContainer.innerHTML = "<h3>Listas Guardadas</h3>";
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-  saved.forEach((list, idx) => {
-    const btn = document.createElement('button');
+  saved.forEach((list, index)=>{
+    const btn = document.createElement("button");
     btn.textContent = `${list.fecha} - ${list.sucursal}`;
-    btn.style.margin = '6px';
-    btn.onclick = ()=> loadList(idx);
-    container.appendChild(btn);
+    btn.style.background = 'transparent';
+    btn.style.color = 'var(--accent)';
+    btn.style.border = '1px solid rgba(37,211,102,0.18)';
+    btn.style.padding = '8px 12px';
+    btn.style.borderRadius = '8px';
+    btn.style.cursor = 'pointer';
+    btn.onclick = ()=> loadList(index);
+    savedListsContainer.appendChild(btn);
   });
 }
 
@@ -203,14 +495,17 @@ function loadList(index){
   const selected = saved[index];
   if(!selected) return;
   const today = new Date().toLocaleDateString();
-  if(selected.fecha !== today){ alert("No se puede modificar una lista de un día anterior."); return; }
+  if(selected.fecha !== today){
+    alert("No se puede modificar una lista de un día anterior.");
+    return;
+  }
   items.length = 0;
-  selected.items.forEach(it => items.push(it));
+  selected.items.forEach(it=> items.push(it));
   renderTable();
-  document.getElementById('branch').value = selected.sucursal;
-  document.getElementById('operator').value = selected.operador || '';
+  document.getElementById("branch").value = selected.sucursal;
+  document.getElementById("operator").value = selected.operador || '';
   saveCurrentState();
-  alert('Lista cargada correctamente.');
+  alert("Lista cargada correctamente.");
 }
 
 function saveTodayListForBranch(branch, operator){
@@ -219,7 +514,11 @@ function saveTodayListForBranch(branch, operator){
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
   const existingIndex = saved.findIndex(l => l.fecha === today && l.sucursal === branch);
   const newList = { fecha: today, sucursal: branch, operador: operator, items: JSON.parse(JSON.stringify(items)) };
-  if(existingIndex >= 0) saved[existingIndex] = newList; else saved.push(newList);
+  if(existingIndex >= 0){
+    saved[existingIndex] = newList;
+  } else {
+    saved.push(newList);
+  }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
   loadSavedLists();
 }
@@ -227,12 +526,19 @@ function saveTodayListForBranch(branch, operator){
 function autosaveToday(){
   const branch = document.getElementById('branch').value;
   const operator = document.getElementById('operator').value.trim();
-  if(branch) saveTodayListForBranch(branch, operator);
+  if(branch){
+    saveTodayListForBranch(branch, operator);
+  }
 }
 
 function saveCurrentState(){
   try{
-    const payload = { items: JSON.parse(JSON.stringify(items)), branch: document.getElementById('branch').value, operator: document.getElementById('operator').value.trim(), lastSavedAt: new Date().toISOString() };
+    const payload = {
+      items: JSON.parse(JSON.stringify(items)),
+      branch: document.getElementById('branch').value,
+      operator: document.getElementById('operator').value.trim(),
+      lastSavedAt: new Date().toISOString()
+    };
     localStorage.setItem(CURRENT_STATE_KEY, JSON.stringify(payload));
   }catch(e){ console.error('Error guardando estado actual', e); }
 }
@@ -244,7 +550,7 @@ function loadCurrentState(){
     const payload = JSON.parse(raw);
     if(payload && Array.isArray(payload.items)){
       items.length = 0;
-      payload.items.forEach(it => items.push(it));
+      payload.items.forEach(it=> items.push(it));
       renderTable();
       if(payload.branch) document.getElementById('branch').value = payload.branch;
       if(payload.operator) document.getElementById('operator').value = payload.operator;
@@ -254,77 +560,250 @@ function loadCurrentState(){
   return false;
 }
 
-/* ===== Generar PDF (utiliza ensureLibraries para fallback) ===== */
-async function generatePdfAction(){
-  if(items.length === 0){ alert('No hay productos'); return; }
+/* Cargar listas al iniciar */
+loadSavedLists();
+
+/* ---------------------------
+   Generar PDF (mejor manejo logo y firma)
+   --------------------------- */
+document.getElementById('generatePDF').addEventListener('click', async ()=>{
+  if(items.length===0){ alert('No hay productos'); return; }
   const operator = document.getElementById('operator').value.trim();
   const branch = document.getElementById('branch').value;
   if(!branch){ alert('Seleccione sucursal'); return; }
   if(!operator){ alert('Ingrese quién realiza el procedimiento'); return; }
 
-  const libsReady = await ensureLibraries();
-  if(!libsReady){ alert('No se pudieron cargar las librerías necesarias para generar el PDF. Revisa la consola.'); return; }
+  // Guardar localmente antes de generar PDF
+  saveTodayListForBranch(branch, operator);
+  saveCurrentState();
 
-  try{
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({unit:'mm', format:[80, 3000]});
-    let y = 10;
+  // Asegurarnos que jsPDF esté disponible (viene por CDN en <head>)
+  if(!(window.jspdf && window.jspdf.jsPDF)){
+    alert('jsPDF no está cargado. Revisa la consola. (Se requieren jspdf y autotable)');
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:[80, 3000]}); // 80mm ancho
+
+  let y = 10;
+  const logoImg = new Image();
+  logoImg.src = 'LOGO1 (2).png';
+
+  // Fallback flag para asegurar que siempre se guarda un PDF (si imágenes fallan)
+  let savedAlready = false;
+
+  // fallback timer (por si no cargan images/onload chain)
+  const fallbackTimer = setTimeout(() => {
+    if(savedAlready) return;
+    if(items.length === 0) return;
+    try{
+      const now3 = new Date();
+      const doc2 = new jsPDF({unit:'mm', format:[80, 3000]});
+      let y2 = 10;
+      doc2.setFontSize(10);
+      doc2.text(`Sucursal: ${branch}`, 40, y2+6, {align:'center'});
+      doc2.text(`Fecha: ${now3.toLocaleDateString()} ${now3.toLocaleTimeString()}`,70,10,{align:'right'});
+      y2 += 12;
+      doc2.text(`Quién realiza: ${operator}`,40,y2,{align:'center'});
+      y2 += 8;
+      doc2.autoTable({
+        startY: y2,
+        theme:'grid',
+        head: [['PROD','CANT','UNI','PROC','REC']],
+        body: items.map(it=>[it.name,it.qty,it.unit,it.supplier,'[ ]']),
+        styles:{ fontSize:9, cellPadding:1, lineWidth:0.9, lineColor:[0,0,0] },
+        tableLineWidth: 1.2,
+        tableLineColor: [0,0,0],
+        margin:{left:2,right:2},
+        tableWidth: 'auto'
+      });
+      y2 = doc2.lastAutoTable.finalY + 10;
+      doc2.text('Observaciones:',40,y2,{align:'center'}); y2+=6;
+      for(let i=0;i<3;i++){ doc2.text('____________________________________',40,y2,{align:'center'}); y2+=8; }
+      doc2.text('Marck Business © 2025',40,y2+10,{align:'center'});
+      const fileName2 = `Lista_${branch}_${now3.getFullYear()}-${now3.getMonth()+1}-${now3.getDate()}.pdf`;
+      doc2.save(fileName2);
+      savedAlready = true;
+    }catch(e){
+      console.error('Fallback PDF error', e);
+    } finally {
+      items.length = 0;
+      renderTable();
+      document.getElementById('branch').value = '';
+    }
+  }, 1800);
+
+  // helper to finalize the doc with small logo and signature
+  function finalizeDoc(docRef, yRef, nowRef){
+    try{
+      const logo2 = new Image();
+      logo2.src = 'LOGOMARCK.png';
+      logo2.onload = ()=>{
+        try{
+          const maxW = 30; // mm
+          const ratio = (logo2.naturalWidth && logo2.naturalHeight) ? (logo2.naturalWidth / logo2.naturalHeight) : 1;
+          const w = maxW;
+          const h = w / ratio;
+          const x = (80 - w) / 2;
+          docRef.addImage(logo2, 'PNG', x, yRef, w, h);
+          yRef += h + 6;
+        }catch(e){ yRef += 4; }
+        try{ docRef.setFontSize(9); docRef.text('Marck Business © 2025', 40, yRef, {align:'center'}); }catch(e){}
+        const fileName = `Lista_${branch}_${nowRef.getFullYear()}-${nowRef.getMonth()+1}-${nowRef.getDate()}.pdf`;
+        if(!savedAlready){ try{ docRef.save(fileName); savedAlready = true; }catch(e){ console.error('Error saving PDF', e);} }
+        // cleanup
+        items.length = 0;
+        renderTable();
+        document.getElementById('branch').value = '';
+      };
+      logo2.onerror = ()=>{
+        try{ docRef.setFontSize(9); docRef.text('Marck Business © 2025', 40, yRef + 8, {align:'center'}); }catch(e){}
+        const fileName = `Lista_${branch}_${nowRef.getFullYear()}-${nowRef.getMonth()+1}-${nowRef.getDate()}.pdf`;
+        if(!savedAlready){ try{ docRef.save(fileName); savedAlready = true; }catch(e){ console.error('Error saving PDF', e);} }
+        items.length = 0;
+        renderTable();
+        document.getElementById('branch').value = '';
+      };
+    }catch(e){
+      try{
+        const fileName = `Lista_${branch}_${nowRef.getFullYear()}-${nowRef.getMonth()+1}-${nowRef.getDate()}.pdf`;
+        if(!savedAlready){ docRef.save(fileName); savedAlready = true; }
+      }catch(err){ console.error(err); }
+      items.length = 0;
+      renderTable();
+      document.getElementById('branch').value = '';
+    }
+  }
+
+  // When logoImg loads draw it and create table
+  logoImg.onload = ()=>{
+    try{
+      const maxWidth = 60;
+      const imgRatio = logoImg.naturalWidth / logoImg.naturalHeight || 1;
+      const imgW = Math.min(maxWidth, (logoImg.naturalWidth * 0.1) || maxWidth);
+      const imgH = imgW / imgRatio;
+      try{ doc.addImage(logoImg, 'PNG', 10, y, imgW, imgH); }catch(e){ /* ignore adding image errors */ }
+      y += (imgH || 10) + 2;
+    }catch(err){ y += 10; }
+
+    const now2 = new Date();
     doc.setFontSize(10);
-    doc.text(`Sucursal: ${branch}`, 40, y, {align:'center'}); y += 6;
-    doc.text(`Operador: ${operator}`, 40, y, {align:'center'}); y += 8;
-    doc.text(`Fecha: ${new Date().toLocaleString()}`, 40, y, {align:'center'}); y += 8;
+    doc.text(`Sucursal: ${branch}`, 40, y, {align:'center'});
+    doc.text(`Fecha: ${now2.toLocaleDateString()} ${now2.toLocaleTimeString()}`,70,10,{align:'right'});
+    y += 6;
+    doc.text(`Quién realiza: ${operator}`,40,y,{align:'center'});
+    y += 6;
 
+    // table with thicker borders
     doc.autoTable({
       startY: y,
-      theme: 'grid',
+      theme:'grid',
       head: [['Producto','Cantidad','Unidad','Proveedor','Recibido']],
-      body: items.map(it => [it.name, it.qty, it.unit, it.supplier, '[ ]']),
-      styles: { fontSize:9, cellPadding:1, lineWidth:0.9, lineColor:[0,0,0] },
+      body: items.map(it=>[it.name,it.qty,it.unit,it.supplier,'[ ]']),
+      styles:{ fontSize:9, cellPadding:1, lineWidth:0.9, lineColor:[0,0,0] },
       tableLineWidth: 1.2,
       tableLineColor: [0,0,0],
-      margin: { left: 2, right: 2 }
+      margin:{left:2,right:2},
+      tableWidth: 'auto'
     });
 
-    const fileName = `Lista_${branch}_${new Date().getFullYear()}-${new Date().getMonth()+1}-${new Date().getDate()}.pdf`;
-    doc.save(fileName);
+    y = doc.lastAutoTable.finalY + 10;
 
-    // Guardar y limpiar
-    saveTodayListForBranch(branch, operator);
-    saveCurrentState();
+    doc.text('Observaciones:',40,y,{align:'center'}); y+=6;
+    for(let i=0;i<3;i++){
+      doc.text('____________________________________',40,y,{align:'center'});
+      y+=8;
+    }
 
-    items.length = 0;
-    renderTable();
-    document.getElementById('branch').value = '';
-    localStorage.removeItem(CURRENT_STATE_KEY);
+    doc.text('Firma de quien recibe:',40,y,{align:'center'}); y+=6;
+    doc.text('____________________________________',40,y,{align:'center'}); y+=8;
+    doc.text('Nombre de quien recibe:',40,y,{align:'center'}); y+=6;
+    doc.text('____________________________________',40,y,{align:'center'}); y+=8;
+    doc.text('Firma de quien entrega:',40,y,{align:'center'}); y+=6;
+    doc.text('____________________________________',40,y,{align:'center'}); y+=12;
 
-    // Abrir WhatsApp según sucursal (si aplica)
-    let number = '';
-    if(branch === 'Roosevelt') number = '51330598';
-    if(branch === 'SanCristobal') number = '39161962';
-    if(branch === 'AtlanticPlaza') number = '41528992';
-    if(number) window.open(`https://wa.me/${number}`, '_blank');
-  }catch(err){
-    console.error('Error generando PDF:', err);
-    alert('Hubo un error generando el PDF. Revisa la consola (F12).');
-  }
-}
+    doc.text('Se reciben correctamente todos los productos:',40,y,{align:'center'});
+    y+=6;
+    doc.rect(20,y,6,6); doc.text('SI',28,y+5);
+    doc.rect(45,y,6,6); doc.text('NO',53,y+5);
+    y+=12;
 
-document.getElementById('generatePDF').addEventListener('click', generatePdfAction);
+    // finalize (logo2 + save)
+    finalizeDoc(doc, y, now2);
+    // cancel fallback timer
+    clearTimeout(fallbackTimer);
+  };
 
-document.getElementById('sendJuanBtn').addEventListener('click', ()=>{ window.open('https://wa.me/58140621','_blank'); });
+  // if logoImg errors, still create PDF without logo
+  logoImg.onerror = ()=>{
+    try{
+      const now2 = new Date();
+      doc.setFontSize(10);
+      doc.text(`Sucursal: ${branch}`, 40, y, {align:'center'});
+      doc.text(`Fecha: ${now2.toLocaleDateString()} ${now2.toLocaleTimeString()}`,70,10,{align:'right'});
+      y += 6;
+      doc.text(`Quién realiza: ${operator}`,40,y,{align:'center'});
+      y += 6;
 
-document.getElementById('deleteAllBtn')?.addEventListener('click', ()=>{
+      doc.autoTable({
+        startY: y,
+        theme:'grid',
+        head: [['Producto','Cantidad','Unidad','Proveedor','Recibido']],
+        body: items.map(it=>[it.name,it.qty,it.unit,it.supplier,'[ ]']),
+        styles:{ fontSize:9, cellPadding:1, lineWidth:0.9, lineColor:[0,0,0] },
+        tableLineWidth: 1.2,
+        tableLineColor: [0,0,0],
+        margin:{left:2,right:2},
+        tableWidth: 'auto'
+      });
+
+      y = doc.lastAutoTable.finalY + 10;
+
+      doc.text('Observaciones:',40,y,{align:'center'}); y+=6;
+      for(let i=0;i<3;i++){
+        doc.text('____________________________________',40,y,{align:'center'});
+        y+=8;
+      }
+
+      finalizeDoc(doc, y, now2);
+      clearTimeout(fallbackTimer);
+    }catch(e){
+      console.error('Error generando PDF en logoImg.onerror', e);
+    }
+  };
+});
+
+/* ----- Enviar a Juan Luis ----- */
+document.getElementById('sendJuanBtn').addEventListener('click', ()=>{
+  window.open('https://wa.me/58140621','_blank');
+});
+
+/* ----- BOTÓN BORRAR TODO ----- */
+document.getElementById('deleteAllBtn').addEventListener('click', ()=>{
   const key = prompt("POR FAVOR INGRESE LA CLAVE DE ADMINISTRADOR");
   if(key === null) return;
-  if(key.trim() === "22782522"){ localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(CURRENT_STATE_KEY); loadSavedLists(); alert("Todas las listas guardadas han sido borradas."); } else alert("Clave incorrecta.");
+  if(key.trim() === "22782522"){
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(CURRENT_STATE_KEY);
+    loadSavedLists();
+    alert("Todas las listas guardadas han sido borradas.");
+  } else {
+    alert("Clave incorrecta.");
+  }
+});
+
+/* Guardar estado actual antes de cerrar o recargar */
+window.addEventListener('beforeunload', (e)=>{
+  saveCurrentState();
 });
 
 /* Inicialización */
-window.addEventListener('DOMContentLoaded', ()=>{
+function init(){
   loadSavedLists();
   loadCurrentState();
-});
-
+}
+window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
