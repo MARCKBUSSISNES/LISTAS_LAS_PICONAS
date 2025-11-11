@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TORTILLAS DE HARIN LAS PICONAS</title>
 
-<!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<!-- Librerías locales (coloca estos archivos en /libs) -->
+<script src="libs/jspdf.umd.min.js"></script>
+<script src="libs/jspdf.plugin.autotable.min.js"></script>
 
 <style>
 /* -------------------------
@@ -355,23 +355,27 @@ tbody tr:hover{ background: rgba(37,211,102,0.05); }
   <div class="delete-label">CLEAR ALL</div>
 </div>
 
-<audio id="addSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
+<!-- Sonidos locales (coloca en /sounds) -->
+<audio id="addSound" src="sounds/CLICK.mp3" preload="auto"></audio>
+<audio id="vozSound" src="sounds/VOZ.mp3" preload="auto"></audio>
 
 <script>
 /* ===========================
    Preservar la lógica original
-   + agregar guardado y UI extras
+   + agregar guardado y UI extras (persistencia completa)
    =========================== */
 
 const items = [];
 const tbody = document.querySelector('#itemsTable tbody');
 const currentDateEl = document.getElementById('currentDate');
 const addSound = document.getElementById('addSound');
+const vozSound = document.getElementById('vozSound');
 const savedListsContainer = document.getElementById('savedLists');
 const countdownText = document.getElementById('countdownText');
 const progressCircle = document.getElementById('progressCircle');
 
 const STORAGE_KEY = "trasladosGuardados";
+const CURRENT_STATE_KEY = "traslado_current_state"; // guarda estado actual (items, branch, operator)
 
 /* ----- Fecha/hora y contador ----- */
 function updateDate(){
@@ -384,8 +388,7 @@ setInterval(updateDate, 1000);
 /* Countdown circular (progress) - 60 seconds */
 const CIRCLE_RADIUS = 44;
 const CIRCLE_CIRC = 2 * Math.PI * CIRCLE_RADIUS; // circumference
-progressCircle.style.strokeDasharray = `${CIRCLE_CIRC}`;
-progressCircle.style.strokeDashoffset = `0`;
+try{ progressCircle.style.strokeDasharray = `${CIRCLE_CIRC}`; progressCircle.style.strokeDashoffset = `0`; }catch(e){}
 
 let countdownSec = 60;
 function syncAndStartCountdown(){
@@ -403,11 +406,11 @@ function syncAndStartCountdown(){
   }, 1000);
 }
 function updateCountdownUI(sec){
-  countdownText.textContent = sec;
+  try{ countdownText.textContent = sec; }catch(e){}
   // progress: 60 -> 0  (we want the stroke to reduce from full to 0)
   const progress = sec / 60; // 1 -> 0
   const dash = CIRCLE_CIRC * (1 - progress); // consumed part
-  progressCircle.style.strokeDashoffset = `${dash}`;
+  try{ progressCircle.style.strokeDashoffset = `${dash}`; }catch(e){}
 }
 syncAndStartCountdown();
 setInterval(syncAndStartCountdown, 30000); // re-sync every 30s
@@ -432,6 +435,7 @@ function deleteItem(index){
   items.splice(index,1);
   renderTable();
   autosaveToday(); // update saved copy
+  saveCurrentState();
 }
 
 /* Hacer funciones globales (mantener compatibilidad con onclick inline) */
@@ -446,7 +450,7 @@ document.getElementById('addBtn').addEventListener('click', ()=>{
   if(!name || !qty || !supplier){ alert('Complete todos los campos'); return; }
   items.push({name, qty, unit, supplier});
   renderTable();
-  addSound.play();
+  try{ addSound.currentTime = 0; addSound.play(); }catch(e){}
   document.getElementById('productName').value='';
   document.getElementById('productQty').value='';
   document.getElementById('productUnit').value='';
@@ -454,6 +458,7 @@ document.getElementById('addBtn').addEventListener('click', ()=>{
 
   // Guardar automáticamente en localStorage al agregar (mantener la lista del día)
   autosaveToday();
+  saveCurrentState();
 });
 
 /* Enter para agregar (igual) */
@@ -467,6 +472,7 @@ document.getElementById('cleanBtn').addEventListener('click', ()=>{
     items.length=0;
     renderTable();
     autosaveToday();
+    saveCurrentState();
   }
 });
 
@@ -509,6 +515,7 @@ function loadList(index){
   renderTable();
   document.getElementById("branch").value = selected.sucursal;
   document.getElementById("operator").value = selected.operador || '';
+  saveCurrentState();
   alert("Lista cargada correctamente.");
 }
 
@@ -516,7 +523,7 @@ function loadList(index){
 function saveTodayListForBranch(branch, operator){
   const now = new Date();
   const today = now.toLocaleDateString();
-  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "(   )");
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
   const existingIndex = saved.findIndex(l => l.fecha === today && l.sucursal === branch);
   const newList = { fecha: today, sucursal: branch, operador: operator, items: JSON.parse(JSON.stringify(items)) };
   if(existingIndex >= 0){
@@ -537,8 +544,37 @@ function autosaveToday(){
   }
 }
 
-/* Cargar listas al iniciar */
-loadSavedLists();
+/* ===== Persistir estado actual (items, branch, operator) para restaurar al abrir de nuevo ===== */
+function saveCurrentState(){
+  try{
+    const payload = {
+      items: JSON.parse(JSON.stringify(items)),
+      branch: document.getElementById('branch').value,
+      operator: document.getElementById('operator').value.trim(),
+      lastSavedAt: new Date().toISOString()
+    };
+    localStorage.setItem(CURRENT_STATE_KEY, JSON.stringify(payload));
+  }catch(e){ console.error('Error guardando estado actual', e); }
+}
+
+function loadCurrentState(){
+  try{
+    const raw = localStorage.getItem(CURRENT_STATE_KEY);
+    if(!raw) return false;
+    const payload = JSON.parse(raw);
+    if(payload && Array.isArray(payload.items)){
+      items.length = 0;
+      payload.items.forEach(it=> items.push(it));
+      renderTable();
+      if(payload.branch) document.getElementById('branch').value = payload.branch;
+      if(payload.operator) document.getElementById('operator').value = payload.operator;
+      return true;
+    }
+  }catch(e){ console.error('Error cargando estado actual', e); }
+  return false;
+}
+
+/* Cargar listas al iniciar se hace en init (ver abajo) */
 
 /* ---------------------------
    Generar PDF (mejor manejo logo y firma)
@@ -553,6 +589,7 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
   // Guardar localmente antes de generar PDF
   const now = new Date();
   saveTodayListForBranch(branch, operator);
+  saveCurrentState();
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({unit:'mm', format:[80, 3000]}); // 80mm ancho
@@ -640,6 +677,7 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
         items.length = 0;
         renderTable();
         document.getElementById('branch').value = '';
+        saveCurrentState();
 
         // Abrir WhatsApp según sucursal (igual)
         let number='';
@@ -665,6 +703,7 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
         items.length = 0;
         renderTable();
         document.getElementById('branch').value = '';
+        saveCurrentState();
 
         let number='';
         if(branch==='Roosevelt') number='51330598';
@@ -684,6 +723,7 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
       items.length = 0;
       renderTable();
       document.getElementById('branch').value = '';
+      saveCurrentState();
 
       let number='';
       if(branch==='Roosevelt') number='51330598';
@@ -817,6 +857,7 @@ document.getElementById('deleteAllBtn').addEventListener('click', ()=>{
   if(key.trim() === "22782522"){
     // delete all saved lists from localStorage
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(CURRENT_STATE_KEY);
     loadSavedLists();
     alert("Todas las listas guardadas han sido borradas.");
   } else {
@@ -824,9 +865,44 @@ document.getElementById('deleteAllBtn').addEventListener('click', ()=>{
   }
 });
 
+/* ===== Guardar estado actual antes de cerrar o recargar ===== */
+window.addEventListener('beforeunload', (e)=>{
+  // Guardamos el estado actual para restaurar en nueva sesión
+  saveCurrentState();
+  // no need to prevent unload, just save
+});
+
+/* ===== Inicialización al cargar la página ===== */
+function init(){
+  loadSavedLists();
+  const restored = loadCurrentState();
+  if(restored){
+    // si restauramos desde estado actual, aseguramos que la UI muestre todo
+    renderTable();
+  }
+
+  // Si no hay items y existe una lista del día para la sucursal seleccionada, cargarla
+  try{
+    const branch = document.getElementById('branch').value;
+    if(items.length === 0 && branch){
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      const today = new Date().toLocaleDateString();
+      const found = saved.find(l => l.fecha === today && l.sucursal === branch);
+      if(found){
+        items.length = 0;
+        found.items.forEach(it => items.push(it));
+        renderTable();
+      }
+    }
+  }catch(e){}
+}
+
+window.addEventListener('DOMContentLoaded', init);
+
 /* Cargar saved lists al iniciar */
 loadSavedLists();
 
 </script>
 </body>
 </html>
+
