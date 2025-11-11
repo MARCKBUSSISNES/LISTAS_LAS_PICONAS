@@ -253,7 +253,7 @@ tbody tr:hover{ background: rgba(37,211,102,0.05); }
 .delete-btn:hover{ transform: scale(1.05); box-shadow: 0 10px 26px rgba(37,211,102,0.08); }
 .delete-label{ font-size:0.85rem; color:#f7c6c6; pointer-events:none; }
 
-/* Small responsiveness */
+% /* Small responsiveness */
 @media (max-width:920px){
   header h1{ font-size:1.3rem; }
   #logo{ width:260px; }
@@ -561,6 +561,139 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
   const logoImg = new Image();
   logoImg.src = 'LOGO1 (2).png';
 
+  // We'll use a small flag to indicate if we've already saved (to avoid duplicate saves)
+  let pdfSaved = false;
+  // fallback timer id to cancel if we already saved
+  const fallbackTimer = setTimeout(() => {
+    if(pdfSaved) return;
+    if(items.length === 0) return;
+    // Similar minimal fallback (without images)
+    const now3 = new Date();
+    const doc2 = new jsPDF({unit:'mm', format:[80, 3000]});
+    let y2 = 10;
+    doc2.setFontSize(10);
+    doc2.text(`Sucursal: ${document.getElementById('branch').value}`, 40, y2+6, {align:'center'});
+    doc2.text(`Fecha: ${now3.toLocaleDateString()} ${now3.toLocaleTimeString()}`,70,10,{align:'right'});
+    y2 += 12;
+    doc2.text(`Quién realiza: ${document.getElementById('operator').value}`,40,y2,{align:'center'});
+    y2 += 8;
+    doc2.autoTable({
+      startY: y2,
+      theme:'grid',
+      head: [['PROD','CANT','UNI','PROC','REC']],
+      body: items.map(it=>[it.name,it.qty,it.unit,it.supplier,'[ ]']),
+      styles:{ fontSize:9, cellPadding:1 },
+      margin:{left:2,right:2},
+      tableWidth: 'auto'
+    });
+    y2 = doc2.lastAutoTable.finalY + 10;
+    doc2.text('Observaciones:',40,y2,{align:'center'}); y2+=6;
+    for(let i=0;i<3;i++){ doc2.text('____________________________________',40,y2,{align:'center'}); y2+=8; }
+    doc2.text('Marck Business © 2025',40,y2+10,{align:'center'});
+    const fileName2 = `Lista_${document.getElementById('branch').value}_${now3.getFullYear()}-${now3.getMonth()+1}-${now3.getDate()}.pdf`;
+    doc2.save(fileName2);
+
+    items.length = 0;
+    renderTable();
+    document.getElementById('branch').value = '';
+
+    let number='';
+    const branchNow = document.getElementById('branch').value;
+    if(branchNow==='Roosevelt') number='51330598';
+    if(branchNow==='SanCristobal') number='39161962';
+    if(branchNow==='AtlanticPlaza') number='41528992';
+    if(number) window.open(`https://wa.me/${number}`,'_blank');
+  }, 1600);
+
+  // helper to finalize the doc (used by logo2 handlers)
+  function finalizeDocWithLogo2(docRef, yRef) {
+    try {
+      // LOGOMARCK small and signature (ensure aspect ratio)
+      const logo2 = new Image();
+      logo2.src = 'LOGOMARCK.png';
+      logo2.onload = () => {
+        try {
+          const maxW = 30; // mm
+          const ratio = (logo2.naturalWidth && logo2.naturalHeight) ? (logo2.naturalWidth / logo2.naturalHeight) : 1;
+          const w = maxW;
+          const h = w / ratio;
+          const x = (80 - w) / 2;
+          docRef.addImage(logo2, 'PNG', x, yRef, w, h);
+          yRef += h + 6;
+        } catch (e) {
+          yRef += 4;
+        }
+
+        // Firma (solo "Sistema Marck Business © 2025")
+        docRef.setFontSize(9);
+        docRef.text('Marck Business © 2025', 40, yRef, {align:'center'});
+        yRef += 8;
+
+        const fileName = `Lista_${branch}_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}.pdf`;
+        if(!pdfSaved){
+          docRef.save(fileName);
+          pdfSaved = true;
+          clearTimeout(fallbackTimer);
+        }
+
+        // Limpiar tabla y sucursal (tal como pediste)
+        items.length = 0;
+        renderTable();
+        document.getElementById('branch').value = '';
+
+        // Abrir WhatsApp según sucursal (igual)
+        let number='';
+        if(branch==='Roosevelt') number='51330598';
+        if(branch==='SanCristobal') number='39161962';
+        if(branch==='AtlanticPlaza') number='41528992';
+        if(number) window.open(`https://wa.me/${number}`,'_blank');
+      };
+
+      logo2.onerror = () => {
+        // If logo2 fails to load, still add signature text and save
+        try {
+          docRef.setFontSize(9);
+          docRef.text('Marck Business © 2025', 40, yRef + 8, {align:'center'});
+        } catch(e){}
+        const fileName = `Lista_${branch}_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}.pdf`;
+        if(!pdfSaved){
+          docRef.save(fileName);
+          pdfSaved = true;
+          clearTimeout(fallbackTimer);
+        }
+
+        items.length = 0;
+        renderTable();
+        document.getElementById('branch').value = '';
+
+        let number='';
+        if(branch==='Roosevelt') number='51330598';
+        if(branch==='SanCristobal') number='39161962';
+        if(branch==='AtlanticPlaza') number='41528992';
+        if(number) window.open(`https://wa.me/${number}`,'_blank');
+      };
+    } catch (e) {
+      // as last resort: save without logo2
+      const fileName = `Lista_${branch}_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}.pdf`;
+      if(!pdfSaved){
+        try { docRef.save(fileName); } catch(err){}
+        pdfSaved = true;
+        clearTimeout(fallbackTimer);
+      }
+
+      items.length = 0;
+      renderTable();
+      document.getElementById('branch').value = '';
+
+      let number='';
+      if(branch==='Roosevelt') number='51330598';
+      if(branch==='SanCristobal') number='39161962';
+      if(branch==='AtlanticPlaza') number='41528992';
+      if(number) window.open(`https://wa.me/${number}`,'_blank');
+    }
+  }
+
+  // When logoImg loads (or errors), we proceed to draw table and then finalize with logo2 (which has its own onerror)
   logoImg.onload = () => {
     try {
       const maxWidth = 60; // mm
@@ -613,85 +746,63 @@ document.getElementById('generatePDF').addEventListener('click', ()=>{
     doc.rect(45,y,6,6); doc.text('NO',53,y+5);
     y+=12;
 
-    // LOGOMARCK small and signature (ensure aspect ratio)
-    const logo2 = new Image();
-    logo2.src = 'LOGOMARCK.png';
-    logo2.onload = () => {
-      try {
-        const maxW = 30; // mm
-        const ratio = (logo2.naturalWidth && logo2.naturalHeight) ? (logo2.naturalWidth / logo2.naturalHeight) : 1;
-        const w = maxW;
-        const h = w / ratio;
-        const x = (80 - w) / 2;
-        doc.addImage(logo2, 'PNG', x, y, w, h);
-        y += h + 6;
-      } catch (e){
-        y += 4;
+    // finalize with logo2 (logo2 has onload and onerror)
+    finalizeDocWithLogo2(doc, y);
+  };
+
+  // if logoImg errors, still continue (no blocking)
+  logoImg.onerror = () => {
+    // skip logoImg but continue the rest
+    try {
+      // continue rendering without logo
+      const now2 = new Date();
+      doc.setFontSize(10);
+      doc.text(`Sucursal: ${branch}`, 40, y, {align:'center'});
+      doc.text(`Fecha: ${now2.toLocaleDateString()} ${now2.toLocaleTimeString()}`,70,10,{align:'right'});
+      y += 6;
+      doc.text(`Quién realiza: ${operator}`,40,y,{align:'center'});
+      y += 6;
+
+      doc.autoTable({
+        startY: y,
+        theme:'grid',
+        head: [['Producto','Cantidad','Unidad','Proveedor','Recibido']],
+        body: items.map(it=>[it.name,it.qty,it.unit,it.supplier,'[ ]']),
+        styles:{ fontSize:9, cellPadding:1 },
+        margin:{left:2,right:2},
+        tableWidth: 'auto'
+      });
+
+      y = doc.lastAutoTable.finalY + 10;
+
+      doc.text('Observaciones:',40,y,{align:'center'}); y+=6;
+      for(let i=0;i<3;i++){
+        doc.text('____________________________________',40,y,{align:'center'});
+        y+=8;
       }
 
-      // Firma (solo "Sistema Marck Business © 2025")
-      doc.setFontSize(9);
-      doc.text('Marck Business © 2025', 40, y, {align:'center'});
-      y += 8;
+      doc.text('Firma de quien recibe:',40,y,{align:'center'}); y+=6;
+      doc.text('____________________________________',40,y,{align:'center'}); y+=8;
+      doc.text('Nombre de quien recibe:',40,y,{align:'center'}); y+=6;
+      doc.text('____________________________________',40,y,{align:'center'}); y+=8;
+      doc.text('Firma de quien entrega:',40,y,{align:'center'}); y+=6;
+      doc.text('____________________________________',40,y,{align:'center'}); y+=12;
 
-      const fileName = `Lista_${branch}_${now2.getFullYear()}-${now2.getMonth()+1}-${now2.getDate()}.pdf`;
-      doc.save(fileName);
+      doc.text('Se reciben correctamente todos los productos:',40,y,{align:'center'});
+      y+=6;
+      doc.rect(20,y,6,6); doc.text('SI',28,y+5);
+      doc.rect(45,y,6,6); doc.text('NO',53,y+5);
+      y+=12;
 
-      // Limpiar tabla y sucursal (tal como pediste)
-      items.length = 0;
-      renderTable();
-      document.getElementById('branch').value = '';
+      // finalize with logo2
+      finalizeDocWithLogo2(doc, y);
+    } catch(e){
+      // in case of unexpected error, fallback will trigger (timer)
+      console.error('Error rendering PDF after logoImg.onerror', e);
+    }
+  };
 
-      // Abrir WhatsApp según sucursal (igual)
-      let number='';
-      if(branch==='Roosevelt') number='51330598';
-      if(branch==='SanCristobal') number='39161962';
-      if(branch==='AtlanticPlaza') number='41528992';
-      if(number) window.open(`https://wa.me/${number}`,'_blank');
-    }; // logo2.onload
-  }; // logoImg.onload
-
-  // fallback timeout if images fail to load
-  setTimeout(() => {
-    if(items.length === 0) return;
-    // Similar minimal fallback (without images)
-    const now3 = new Date();
-    const doc2 = new jsPDF({unit:'mm', format:[80, 3000]});
-    let y2 = 10;
-    doc2.setFontSize(10);
-    doc2.text(`Sucursal: ${document.getElementById('branch').value}`, 40, y2+6, {align:'center'});
-    doc2.text(`Fecha: ${now3.toLocaleDateString()} ${now3.toLocaleTimeString()}`,70,10,{align:'right'});
-    y2 += 12;
-    doc2.text(`Quién realiza: ${document.getElementById('operator').value}`,40,y2,{align:'center'});
-    y2 += 8;
-    doc2.autoTable({
-      startY: y2,
-      theme:'grid',
-      head: [['PROD','CANT','UNI','PROC','REC']],
-      body: items.map(it=>[it.name,it.qty,it.unit,it.supplier,'[ ]']),
-      styles:{ fontSize:9, cellPadding:1 },
-      margin:{left:2,right:2},
-      tableWidth: 'auto'
-    });
-    y2 = doc2.lastAutoTable.finalY + 10;
-    doc2.text('Observaciones:',40,y2,{align:'center'}); y2+=6;
-    for(let i=0;i<3;i++){ doc2.text('____________________________________',40,y2,{align:'center'}); y2+=8; }
-    doc2.text('Marck Business © 2025',40,y2+10,{align:'center'});
-    const fileName2 = `Lista_${document.getElementById('branch').value}_${now3.getFullYear()}-${now3.getMonth()+1}-${now3.getDate()}.pdf`;
-    doc2.save(fileName2);
-
-    items.length = 0;
-    renderTable();
-    document.getElementById('branch').value = '';
-
-    let number='';
-    const branchNow = document.getElementById('branch').value;
-    if(branchNow==='Roosevelt') number='51330598';
-    if(branchNow==='SanCristobal') number='39161962';
-    if(branchNow==='AtlanticPlaza') number='41528992';
-    if(number) window.open(`https://wa.me/${number}`,'_blank');
-
-  }, 1600);
+  // Note: fallbackTimer (above) will run if onload/onerror chain doesn't save within ~1600ms.
 });
 
 /* ----- Enviar a Juan Luis (igual) ----- */
